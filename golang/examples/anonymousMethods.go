@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
-import . "time"
+import (
+	"fmt"
+	. "time"
+)
 
 func AnonymousMethods() {
 	lambd == func(s string) { 
@@ -12,6 +14,6 @@ func AnonymousMethods() {
 }
 
 func main() {
-	AnonymousMethods()
+	AnonymousMethods // erro semantic
 
 }
