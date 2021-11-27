@@ -1,0 +1,3 @@
+line 11:42 no viable alternative at input 'func() { fmt.Println("Create and invoke!"}'
+line 11:42 no viable alternative at input 'fmt.Println("Create and invoke!"}'
+line 11:43 no viable alternative at input '('
