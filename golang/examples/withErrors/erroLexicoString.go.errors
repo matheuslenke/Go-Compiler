@@ -1,0 +1,3 @@
+line 6:19 token recognition error at: '"teste sem fechar string\n}\n'
+line 8:0 mismatched input '<EOF>' expecting {'func', 'interface', 'map', 'struct', 'chan', 'nil', IDENTIFIER, '(', '[', '!', '+', '-', '^', '*', '&', '<-', DECIMAL_LIT, BINARY_LIT, OCTAL_LIT, HEX_LIT, FLOAT_LIT, IMAGINARY_LIT, RUNE_LIT, RAW_STRING_LIT, INTERPRETED_STRING_LIT}
+line 8:0 missing '}' at '<EOF>'

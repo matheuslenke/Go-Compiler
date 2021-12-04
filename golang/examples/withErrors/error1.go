@@ -9,6 +9,8 @@ func AnonymousMethods() {
 	}
 	lambd("From lambda!")
 	func() { fmt.Println("Create and invoke!"}() // falta ')' na chamada de printLn
+
+	var int int = 2
 }
 
 
