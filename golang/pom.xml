@@ -58,7 +58,7 @@
 				<version>${antlr4test-maven-plugin.version}</version>
 				<configuration>
 					<verbose>false</verbose>
-					<showTree>true</showTree>
+					<showTree>false</showTree>
 					<entryPoint>sourceFile</entryPoint>
 					<grammarName>Go</grammarName>
 					<packageName></packageName>

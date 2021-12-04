@@ -1,4 +1,4 @@
-package main
+package samples
 
 import (
 	"fmt"
@@ -6,14 +6,12 @@ import (
 )
 
 func AnonymousMethods() {
-	lambd == func(s string) { 
-		Sleep(10); fmt.Println(s) 
-	}
+	lambd := func(s string) { Sleep(10); fmt.Println(s) }
 	lambd("From lambda!")
 	func() { fmt.Println("Create and invoke!")}()
 }
 
-func main() {
-	AnonymousMethods // erro semantic
 
+func main(){
+	AnonymousMethods // erro semântico
 }

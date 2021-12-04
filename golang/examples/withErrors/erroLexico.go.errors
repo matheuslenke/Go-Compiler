@@ -1,0 +1,4 @@
+line 7:5 extraneous input '1' expecting {IDENTIFIER, '('}
+line 10:9 token recognition error at: '$'
+line 10:7 no viable alternative at input 'a'
+line 10:11 no viable alternative at input '_b'
