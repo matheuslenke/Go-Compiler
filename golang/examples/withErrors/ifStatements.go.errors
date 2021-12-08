@@ -1,0 +1,3 @@
+line 14:1 no viable alternative at input 'x < 0 \n\treturn'
+line 25:2 no viable alternative at input '"test" // Case sem :\n\t\tfmt'
+line 29:15 no viable alternative at input 'switch'

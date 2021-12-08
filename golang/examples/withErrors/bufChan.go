@@ -14,21 +14,8 @@ func BufChan() {
 	close(c)
 	fmt.Println(len(c), cap(c)) // 2 2
 	x ok := <-c // falta separador entre identificadores em declaração/atribuição
-	fmt.Println(x, ok)          // 3 true
-	fmt.Println(len(c), cap(c)) // 1 2
-	x, ok = <-c
-	fmt.Println(x, ok)          // 5 true
-	fmt.Println(len(c), cap(c)) // 0 2
-	x, ok = <-c
-	fmt.Println(x, ok) // 0 false
-	x, ok = <-c
-	fmt.Println(x, ok)          // 0 false
-	fmt.Println(len(c), cap(c)) // 0 2
-	// close(c) // panic!
-	// The send will also panic if the above
-	// close call is removed.
-	// c <- 7
 
-	ch := make(chan int)
-	go goRoutineA(ch)
+	x, ok = < c // Falta hifen da seta
+
+	x, ok = - c // Operacao de assign invalida
 }

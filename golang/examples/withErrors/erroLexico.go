@@ -9,5 +9,5 @@ func main() {
 
 	c := 1a $ _b // operador $ não reconhecido
 	
-	d := 4,21 
+	 := 4,21 // identificador vazio
 }
