@@ -5,6 +5,8 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import br.ufes.edu.compiladores.checker.SemanticChecker;
 
 /*
@@ -16,8 +18,9 @@ import br.ufes.edu.compiladores.checker.SemanticChecker;
   omitida aqui para simplificar o código e facilitar a leitura.
 */
 
-public class GoCompiler {
 
+public class GoCompiler {
+    private static Logger logger = LogManager.getLogger(GoCompiler.class);
     public static void main(String[] args) throws IOException {
         // Cria um CharStream que lê os caracteres de um arquivo.
         CharStream input = CharStreams.fromFileName(args[0]);
@@ -46,7 +49,7 @@ public class GoCompiler {
 
         // Saída final.
         if (checker.hasPassed()) {
-            System.out.println("PARSE SUCCESSFUL!");
+            logger.info("PARSE SUCCESSFUL");
             checker.printTables();
         }
     }
