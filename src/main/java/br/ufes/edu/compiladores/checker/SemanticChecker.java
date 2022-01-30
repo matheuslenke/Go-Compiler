@@ -1,13 +1,17 @@
 package br.ufes.edu.compiladores.checker;
 
+import java.util.List;
+
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import br.ufes.edu.compiladores.GoParser.ExpressionListContext;
 import br.ufes.edu.compiladores.GoParser.IdentifierListContext;
 import br.ufes.edu.compiladores.GoParser.TypeNameContext;
 import br.ufes.edu.compiladores.GoParser.TypeSpecContext;
+import br.ufes.edu.compiladores.GoParser.VarDeclContext;
 import br.ufes.edu.compiladores.GoParser.VarSpecContext;
 import br.ufes.edu.compiladores.GoParserBaseVisitor;
 import br.ufes.edu.compiladores.tables.StrTable;
@@ -121,15 +125,40 @@ public class SemanticChecker extends GoParserBaseVisitor<IType> {
 
     @Override
     public IType visitVarSpec(VarSpecContext ctx) {
-        this.visit(ctx.type_());
-        this.visit(ctx.identifierList());
+
+        IType rhsType = this.visit(ctx.type_());
+
+        List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
+        for (TerminalNode identifier : identifierList) {
+            this.newVar(identifier.getSymbol());
+        }
+
+        ExpressionListContext expressionList = ctx.expressionList();
+        IType lhsType = this.visit(expressionList);
+
+        if (expressionList != null) {
+            
+            if (rhsType != lhsType) {
+                typeError(ctx.getToken(0, 0).getSymbol().getLine(), "=", lhsType, lhsType);
+            }
+            int quantExpressionList = 0;
+            if (expressionList.COMMA() != null) {
+                quantExpressionList = expressionList.COMMA().size() + 1;
+            }
+            if (identifierList.size() != quantExpressionList) {
+
+                logger.error("SEMANTIC ERROR (%d): cannot initialize %d variables with %d values%n",
+                        ctx.getToken(0, 0).getSymbol().getLine(), identifierList.size(), quantExpressionList);
+                this.passed = false;
+            }
+        }
         return PrimitiveType.NO_TYPE;
     }
 
     @Override
     public IType visitTypeSpec(TypeSpecContext ctx) {
         if (ctx.ASSIGN() == null) {
-            
+
         } else {
 
         }

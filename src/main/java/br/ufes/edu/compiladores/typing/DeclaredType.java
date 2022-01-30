@@ -1,6 +1,5 @@
 package br.ufes.edu.compiladores.typing;
 
-import java.util.List;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
