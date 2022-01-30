@@ -2,7 +2,8 @@ package br.ufes.edu.compiladores.tables;
 
 import java.util.Formatter;
 import java.util.HashMap;
-import br.ufes.edu.compiladores.typing.PrimitiveType;
+
+import br.ufes.edu.compiladores.typing.IType;
 
 /**
  * Tabela para registro da tabela de símbolos do programa
@@ -15,7 +16,7 @@ public final class VarTable {
         return this.table.containsKey(s);
     }
 
-    public void addVar(String s, int line, PrimitiveType type) {
+    public void addVar(String s, int line, IType type) {
         this.table.put(s, new Entry(s, line, type));
     }
 
@@ -27,7 +28,7 @@ public final class VarTable {
         return this.table.get(key).line;
     }
 
-    public PrimitiveType getType(String key) {
+    public IType getType(String key) {
         return this.table.get(key).type;
     }
 
@@ -36,7 +37,7 @@ public final class VarTable {
         Formatter f = new Formatter(sb);
         f.format("Variables table:%n");
         this.table.forEach((String key, Entry value) -> f.format("Entry %s -- name: %s, line: %d, type: %s%n", key,
-                value.name, value.line, value.type.toString()));
+                value.name, value.line, value.type.getIdentifier()));
         f.close();
         return sb.toString();
     }
@@ -44,9 +45,9 @@ public final class VarTable {
     private final class Entry {
         private final String name;
         private final int line;
-        private final PrimitiveType type;
+        private final IType type;
 
-        private Entry(String name, int line, PrimitiveType type) {
+        private Entry(String name, int line, IType type) {
             this.name = name;
             this.line = line;
             this.type = type;

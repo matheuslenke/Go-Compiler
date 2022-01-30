@@ -9,7 +9,7 @@ func multiRet() (int, int) {
 }
 
 func VarDecls() {
-	var a int        // +
+	var a in   // +
 	var b, c float64 // + strange extra levels
 	var d = 1        // + doesn't show zero value
 	var e, f float32 = -1, -2  // +
