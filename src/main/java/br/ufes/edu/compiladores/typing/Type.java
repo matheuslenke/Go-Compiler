@@ -1,7 +1,7 @@
 package br.ufes.edu.compiladores.typing;
 
 // Enumeração dos tipos nativos que podem existir em GO.
-public enum PrimitiveType implements IType {
+public enum Type {
     // Set of Boolean truth values denoted by the predeclared constants true and
     // false
     BOOL_TYPE("bool"),
@@ -49,15 +49,21 @@ public enum PrimitiveType implements IType {
     // Set of string values. A string value is a (possibly empty) sequence of bytes.
     STR_TYPE("string"),
 
+    // A struct is a sequence of named elements, called fields, each of which has a name and a type
+    STRUCT_TYPE("struct"),
+
+    ARRAY_TYPE("array"),
+
+    MAP_TYPE("map"),
+
     NO_TYPE(null);
 
     private String name;
 
-    private PrimitiveType(String name) {
+    private Type(String name) {
         this.name = name;
     }
 
-    @Override
     public String getIdentifier() {
         return this.name;
     }

@@ -2,34 +2,28 @@ package br.ufes.edu.compiladores.tables;
 
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.Map;
 
-import br.ufes.edu.compiladores.typing.IType;
+import br.ufes.edu.compiladores.ast.NodeData;
+import br.ufes.edu.compiladores.typing.Type;
+
+import lombok.Getter;
 
 /**
  * Tabela para registro da tabela de símbolos do programa
  */
 public final class VarTable {
 
-    private HashMap<String, Entry> table = new HashMap<>();
+    private Map<String, Entry> table = new HashMap<>();
 
-    public boolean lookupVar(String s) {
-        return this.table.containsKey(s);
+    public Entry lookupVar(String s) {
+        return this.table.get(s);
     }
 
-    public void addVar(String s, int line, IType type) {
-        this.table.put(s, new Entry(s, line, type));
-    }
-
-    public String getName(String key) {
-        return this.table.get(key).name;
-    }
-
-    public int getLine(String key) {
-        return this.table.get(key).line;
-    }
-
-    public IType getType(String key) {
-        return this.table.get(key).type;
+    public Entry addVar(String s, int line, Type type) {
+        Entry value = new Entry(s, line, type);
+        this.table.put(s, value);
+        return value;
     }
 
     public String toString() {
@@ -42,12 +36,17 @@ public final class VarTable {
         return sb.toString();
     }
 
-    private final class Entry {
+    @Getter
+    public static final class Entry implements NodeData<Entry> {
         private final String name;
         private final int line;
-        private final IType type;
+        private final Type type;
 
-        private Entry(String name, int line, IType type) {
+        public Entry getValue() {
+            return this;
+        }
+
+        private Entry(String name, int line, Type type) {
             this.name = name;
             this.line = line;
             this.type = type;

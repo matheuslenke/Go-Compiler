@@ -1,6 +1,7 @@
 package br.ufes.edu.compiladores;
 
 import java.io.IOException;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -18,12 +19,13 @@ import br.ufes.edu.compiladores.checker.SemanticChecker;
   omitida aqui para simplificar o código e facilitar a leitura.
 */
 
-
 public class GoCompiler {
     private static Logger logger = LogManager.getLogger(GoCompiler.class);
+
     public static void main(String[] args) throws IOException {
         // Cria um CharStream que lê os caracteres de um arquivo.
-        CharStream input = CharStreams.fromFileName(args[0]);
+        CharStream input = CharStreams
+                .fromFileName("D:\\Projetos\\Compiladores\\Go-Compiler\\src\\test\\resources\\examples\\varDecl.go");
 
         // Cria um lexer que consome a entrada do CharStream.
         GoLexer lexer = new GoLexer(input);
@@ -47,10 +49,8 @@ public class GoCompiler {
         SemanticChecker checker = new SemanticChecker();
         checker.visit(tree);
 
-        // Saída final.
-        if (checker.hasPassed()) {
             logger.info("PARSE SUCCESSFUL");
             checker.printTables();
-        }
+        
     }
 }

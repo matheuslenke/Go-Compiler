@@ -241,8 +241,8 @@ parameters:
 parameterDecl: identifierList? ELLIPSIS? type_;
 
 expression:
-	primaryExpr
-	| unaryExpr
+	primaryExpr # primaryOp
+	| unaryExpr # unaryOp
 	| expression mul_op = (
 		STAR
 		| DIV
@@ -251,8 +251,8 @@ expression:
 		| RSHIFT
 		| AMPERSAND
 		| BIT_CLEAR
-	) expression
-	| expression add_op = (PLUS | MINUS | OR | CARET) expression
+	) expression # mulOp
+	| expression add_op = (PLUS | MINUS | OR | CARET) expression # addOp
 	| expression rel_op = (
 		EQUALS
 		| NOT_EQUALS
@@ -260,9 +260,10 @@ expression:
 		| LESS_OR_EQUALS
 		| GREATER
 		| GREATER_OR_EQUALS
-	) expression
-	| expression LOGICAL_AND expression
-	| expression LOGICAL_OR expression;
+	) expression # relOp
+	| expression LOGICAL_AND expression # andOperator
+	| expression LOGICAL_OR expression # orOperator
+    ;
 
 primaryExpr:
 	operand

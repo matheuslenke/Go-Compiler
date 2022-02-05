@@ -95,6 +95,7 @@
                 <configuration>
                     <verbose>false</verbose>
                     <showTree>false</showTree>
+                    <enabled>false</enabled>
                     <entryPoint>sourceFile</entryPoint>
                     <grammarName>Go</grammarName>
                     <packageName>br.ufes.edu.compiladores</packageName>

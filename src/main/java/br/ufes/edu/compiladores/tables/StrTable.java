@@ -1,16 +1,19 @@
 package br.ufes.edu.compiladores.tables;
 
 import java.util.Formatter;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
+import lombok.Getter;
 
 /**
  * Classe para registro da tabela de strings para uso posterior
  */
 public final class StrTable {
-    private HashSet<String> table = new HashSet<>();
+    private Map<String, String> table = new HashMap<>();
 
-    public boolean add(String s) {
-        return table.add(s);
+    public String add(String s) {
+
+        return this.table.computeIfAbsent(s, k -> s);
     }
 
     public String toString() {
@@ -18,10 +21,19 @@ public final class StrTable {
         Formatter f = new Formatter(sb);
         f.format("Strings table:%n");
 
-        table.forEach(v -> f.format("Entry %s%n", v));
+        table.forEach((k, v) -> f.format("Entry %s%n", v));
 
         f.close();
         return sb.toString();
+    }
+
+    @Getter
+    public final class StrEntry {
+        private final String strValue;
+
+        private StrEntry(String strValue) {
+            this.strValue = strValue;
+        }
     }
 
 }

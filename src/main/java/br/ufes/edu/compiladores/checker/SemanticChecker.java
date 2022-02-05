@@ -11,71 +11,63 @@ import br.ufes.edu.compiladores.GoParser.ExpressionListContext;
 import br.ufes.edu.compiladores.GoParser.IdentifierListContext;
 import br.ufes.edu.compiladores.GoParser.TypeNameContext;
 import br.ufes.edu.compiladores.GoParser.TypeSpecContext;
-import br.ufes.edu.compiladores.GoParser.VarDeclContext;
 import br.ufes.edu.compiladores.GoParser.VarSpecContext;
 import br.ufes.edu.compiladores.GoParserBaseVisitor;
+import br.ufes.edu.compiladores.ast.AbstractSyntaxTree;
+import br.ufes.edu.compiladores.ast.NodeKind;
 import br.ufes.edu.compiladores.tables.StrTable;
 import br.ufes.edu.compiladores.tables.VarTable;
-import br.ufes.edu.compiladores.typing.IType;
-import br.ufes.edu.compiladores.typing.PrimitiveType;
+import br.ufes.edu.compiladores.tables.VarTable.Entry;
+import br.ufes.edu.compiladores.typing.Type;
 import br.ufes.edu.compiladores.utils.TypeUtil;
 
-public class SemanticChecker extends GoParserBaseVisitor<IType> {
+public class SemanticChecker extends GoParserBaseVisitor<AbstractSyntaxTree> {
 
     private static Logger logger = LogManager.getLogger(SemanticChecker.class);
     private StrTable st = new StrTable(); // Tabela de strings.
     private VarTable vt = new VarTable(); // Tabela de variáveis.
 
-    private boolean passed = true;
-
-    IType lastDeclType; // Variável "global" com o último tipo declarado.
-
-    public boolean hasPassed() {
-        return passed;
-    }
+    Type lastDeclType; // Variável "global" com o último tipo declarado.
 
     // Testa se o dado token foi declarado antes.
-    IType checkVar(Token token) {
+    private AbstractSyntaxTree checkVar(Token token) {
         String text = token.getText();
         int line = token.getLine();
-        if (!vt.lookupVar(text)) {
+        Entry entry = vt.lookupVar(text);
+        if (entry == null) {
             logger.error(
                     "SEMANTIC ERROR (%d): variable '%s' was not declared.%n",
                     line, text);
-            passed = false;
-            return PrimitiveType.NO_TYPE;
+            System.exit(1);
         }
-        return vt.getType(text);
+        return new AbstractSyntaxTree(NodeKind.VAR_USE_NODE, entry, entry.getType());
     }
 
     // Cria uma nova variável a partir do dado token.
-    void newVar(Token token) {
+    private AbstractSyntaxTree newVar(Token token) {
         String text = token.getText();
         int currentLine = token.getLine();
-        if (vt.lookupVar(text)) {
-            int originalLine = vt.getLine(text);
+        Entry entry = vt.lookupVar(text);
+        if (entry != null) {
+            int originalLine = entry.getLine();
             logger.error(
                     "SEMANTIC ERROR (%d): variable '%s' already declared at line %d.%n",
                     currentLine, text, originalLine);
-            passed = false;
-            return;
+            System.exit(1);
         }
-        vt.addVar(text, currentLine, lastDeclType);
+        entry = vt.addVar(text, currentLine, lastDeclType);
+        return new AbstractSyntaxTree(NodeKind.VAR_USE_NODE, entry, lastDeclType);
     }
     // ----------------------------------------------------------------------------
     // Type checking and inference.
 
-    private void typeError(int lineNo, String op, IType t1, IType t2) {
+    private void typeError(int lineNo, String op, Type t1, Type t2) {
         logger.error("SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%s' and RHS is '%s'.%n",
                 lineNo, op, t1, t2);
-        passed = false;
+        System.exit(1);
     }
 
-    // Essa função também poderia virar uma tabela de unificação dos tipos,
-    // igual às que estão em IType, mas fica aqui como uma outra forma de
-    // implementar
-    // a verificação de tipos.
-    private void checkAssign(int lineNo, IType l, IType r) {
+    private void checkAssign(int lineNo, Type l, Type r) {
         if (l != r) {
             typeError(lineNo, ":=", l, r);
         }
@@ -88,45 +80,45 @@ public class SemanticChecker extends GoParserBaseVisitor<IType> {
         logger.info(vt);
     }
 
-    private void checkBoolExpr(int lineNo, String cmd, IType t) {
-        if (t != PrimitiveType.BOOL_TYPE) {
+    private void checkBoolExpr(int lineNo, String cmd, Type t) {
+        if (t != Type.BOOL_TYPE) {
             String typeText = t.toString();
-            String boolString = PrimitiveType.BOOL_TYPE.toString();
+            String boolString = Type.BOOL_TYPE.toString();
             logger.error("SEMANTIC ERROR (%d): conditional expression in '%s' is '%s' instead of '%s'.%n",
                     lineNo, cmd, typeText, boolString);
-            passed = false;
+            System.exit(1);
         }
     }
 
-    private IType checkTypeValid(Token token) {
+    private Type checkTypeValid(Token token) {
         String text = token.getText();
         int line = token.getLine();
-        IType t = TypeUtil.getTypeByIdentifier(text);
-        if (t == PrimitiveType.NO_TYPE) {
+        Type t = TypeUtil.getTypeByIdentifier(text);
+        if (t == Type.NO_TYPE) {
             logger.error("SEMANTIC ERROR (%d): Tipo %s não existe.%n",
                     line, text);
-            passed = false;
+            System.exit(1);
         }
         return t;
     }
 
     @Override
-    public IType visitTypeName(TypeNameContext ctx) {
+    public AbstractSyntaxTree visitTypeName(TypeNameContext ctx) {
         return checkTypeValid(ctx.IDENTIFIER().getSymbol());
     }
 
     @Override
-    public IType visitIdentifierList(IdentifierListContext ctx) {
+    public AbstractSyntaxTree visitIdentifierList(IdentifierListContext ctx) {
         for (TerminalNode identifier : ctx.IDENTIFIER()) {
             this.checkVar(identifier.getSymbol());
         }
-        return PrimitiveType.NO_TYPE;
+        return Type.NO_TYPE;
     }
 
     @Override
-    public IType visitVarSpec(VarSpecContext ctx) {
+    public AbstractSyntaxTree visitVarSpec(VarSpecContext ctx) {
 
-        IType rhsType = this.visit(ctx.type_());
+        Type rhsType = this.visit(ctx.type_());
 
         List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
         for (TerminalNode identifier : identifierList) {
@@ -134,10 +126,10 @@ public class SemanticChecker extends GoParserBaseVisitor<IType> {
         }
 
         ExpressionListContext expressionList = ctx.expressionList();
-        IType lhsType = this.visit(expressionList);
+        Type lhsType = this.visit(expressionList);
 
         if (expressionList != null) {
-            
+
             if (rhsType != lhsType) {
                 typeError(ctx.getToken(0, 0).getSymbol().getLine(), "=", lhsType, lhsType);
             }
@@ -149,20 +141,23 @@ public class SemanticChecker extends GoParserBaseVisitor<IType> {
 
                 logger.error("SEMANTIC ERROR (%d): cannot initialize %d variables with %d values%n",
                         ctx.getToken(0, 0).getSymbol().getLine(), identifierList.size(), quantExpressionList);
-                this.passed = false;
+                System.exit(1);
             }
         }
-        return PrimitiveType.NO_TYPE;
+        return Type.NO_TYPE;
     }
 
     @Override
-    public IType visitTypeSpec(TypeSpecContext ctx) {
+    public AbstractSyntaxTree visitTypeSpec(TypeSpecContext ctx) {
         if (ctx.ASSIGN() == null) {
 
         } else {
 
         }
-        return PrimitiveType.NO_TYPE;
+        return Type.NO_TYPE;
     }
+
+    @Override
+    public AbstractSyntaxTree visitExpr
 
 }
