@@ -64,7 +64,8 @@ public enum Type {
         this.name = name;
     }
 
-    public String getIdentifier() {
+    @Override
+    public String toString() {
         return this.name;
     }
 

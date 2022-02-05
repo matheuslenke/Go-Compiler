@@ -49,8 +49,8 @@ public class GoCompiler {
         SemanticChecker checker = new SemanticChecker();
         checker.visit(tree);
 
-            logger.info("PARSE SUCCESSFUL");
-            checker.printTables();
-        
+        logger.info("PARSE SUCCESSFUL");
+        checker.printTables();
+
     }
 }

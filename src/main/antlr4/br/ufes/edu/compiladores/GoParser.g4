@@ -72,10 +72,9 @@ receiver: parameters;
 varDecl: VAR (varSpec | L_PAREN (varSpec eos)* R_PAREN);
 
 varSpec:
-	identifierList (
-		type_ (ASSIGN expressionList)?
-		| ASSIGN expressionList
-	);
+	identifierList type_ (ASSIGN expressionList)? # varDeclExplType
+    | identifierList ASSIGN expressionList # varDeclImplType
+	;
 
 block: L_CURLY statementList? R_CURLY;
 

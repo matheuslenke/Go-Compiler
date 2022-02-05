@@ -3,7 +3,6 @@ package br.ufes.edu.compiladores.tables;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.Getter;
 
 /**
  * Classe para registro da tabela de strings para uso posterior
@@ -25,15 +24,6 @@ public final class StrTable {
 
         f.close();
         return sb.toString();
-    }
-
-    @Getter
-    public final class StrEntry {
-        private final String strValue;
-
-        private StrEntry(String strValue) {
-            this.strValue = strValue;
-        }
     }
 
 }

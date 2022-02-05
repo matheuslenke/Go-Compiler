@@ -7,11 +7,14 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import br.ufes.edu.compiladores.GoParser.ExpressionListContext;
-import br.ufes.edu.compiladores.GoParser.IdentifierListContext;
+import br.ufes.edu.compiladores.GoParser.DeclarationContext;
+import br.ufes.edu.compiladores.GoParser.FunctionDeclContext;
+import br.ufes.edu.compiladores.GoParser.IntegerContext;
+import br.ufes.edu.compiladores.GoParser.SourceFileContext;
+import br.ufes.edu.compiladores.GoParser.String_Context;
 import br.ufes.edu.compiladores.GoParser.TypeNameContext;
-import br.ufes.edu.compiladores.GoParser.TypeSpecContext;
-import br.ufes.edu.compiladores.GoParser.VarSpecContext;
+import br.ufes.edu.compiladores.GoParser.VarDeclExplTypeContext;
+import br.ufes.edu.compiladores.GoParser.VarDeclImplTypeContext;
 import br.ufes.edu.compiladores.GoParserBaseVisitor;
 import br.ufes.edu.compiladores.ast.AbstractSyntaxTree;
 import br.ufes.edu.compiladores.ast.NodeKind;
@@ -23,48 +26,179 @@ import br.ufes.edu.compiladores.utils.TypeUtil;
 
 public class SemanticChecker extends GoParserBaseVisitor<AbstractSyntaxTree> {
 
-    private static Logger logger = LogManager.getLogger(SemanticChecker.class);
-    private StrTable st = new StrTable(); // Tabela de strings.
-    private VarTable vt = new VarTable(); // Tabela de variáveis.
+    protected Logger logger = LogManager.getLogger(SemanticChecker.class);
+    protected StrTable st = new StrTable(); // Tabela de strings.
+    protected VarTable vt = new VarTable(); // Tabela de variáveis.
 
-    Type lastDeclType; // Variável "global" com o último tipo declarado.
+    protected Type lastDeclType; // Variável "global" com o último tipo declarado.
+    AbstractSyntaxTree root;
 
     // Testa se o dado token foi declarado antes.
-    private AbstractSyntaxTree checkVar(Token token) {
-        String text = token.getText();
-        int line = token.getLine();
-        Entry entry = vt.lookupVar(text);
+    private AbstractSyntaxTree checkVar(final Token token) {
+        final String text = token.getText();
+        final int line = token.getLine();
+        final Entry entry = vt.lookupVar(text);
         if (entry == null) {
-            logger.error(
-                    "SEMANTIC ERROR (%d): variable '%s' was not declared.%n",
+            this.logger.error(
+                    "SEMANTIC ERROR ({}): variable '{}' was not declared.\n",
                     line, text);
             System.exit(1);
         }
         return new AbstractSyntaxTree(NodeKind.VAR_USE_NODE, entry, entry.getType());
     }
 
+    // ----------------------------------------------------------------------------
+    // Type checking and inference.
+
+    protected void typeError(final int lineNo, final String op, final Type t1, final Type t2) {
+        this.logger.error("SEMANTIC ERROR ({}): incompatible types for operator '{}', LHS is '{}' and RHS is '{}'.\n",
+                lineNo, op, t1, t2);
+        System.exit(1);
+    }
+
+    public void printTables() {
+        this.logger.info(st);
+        this.logger.info(vt);
+    }
+
+    private void checkBoolExpr(final int lineNo, final String cmd, final Type t) {
+        if (t != Type.BOOL_TYPE) {
+            final String typeText = t.toString();
+            final String boolString = Type.BOOL_TYPE.toString();
+            this.logger.error("SEMANTIC ERROR ({}): conditional expression in '{}' is '{}' instead of '{}'.\n",
+                    lineNo, cmd, typeText, boolString);
+            System.exit(1);
+        }
+    }
+
+    private void checkTypeValid(final Token token) {
+        final String text = token.getText();
+        final int line = token.getLine();
+        final Type t = TypeUtil.getTypeByIdentifier(text);
+        if (t == null) {
+            this.logger.error("SEMANTIC ERROR ({}): Type '{}' doesn't exist.\n",
+                    line, text);
+            System.exit(1);
+        }
+        this.lastDeclType = t;
+    }
+
+    // Visita a regra sourceFile: packageClause eos (importDecl eos)* ((functionDecl
+    // | methodDecl | declaration) eos)* EOF
+    @Override
+    public AbstractSyntaxTree visitSourceFile(final SourceFileContext ctx) {
+        // Visita recursivamente os filhos para construir a AST.
+        final AbstractSyntaxTree functionDeclTree = AbstractSyntaxTree.newSubtree(NodeKind.FUNCTION_DECLARATION,
+                Type.NO_TYPE);
+        for (final FunctionDeclContext functionDeclContext : ctx.functionDecl()) {
+            functionDeclTree.addChildren(this.visit(functionDeclContext));
+        }
+
+        final AbstractSyntaxTree declTree = AbstractSyntaxTree.newSubtree(NodeKind.DECLARATION,
+                Type.NO_TYPE);
+
+        for (final DeclarationContext declContext : ctx.declaration()) {
+            declTree.addChildren(this.visit(declContext));
+        }
+        // Como esta é a regra inicial, chegamos na raiz da AST.
+        this.root = AbstractSyntaxTree.newSubtree(NodeKind.SOURCE_FILE, Type.NO_TYPE, functionDeclTree, declTree);
+        return this.root;
+    }
+
+    @Override
+    public AbstractSyntaxTree visitInteger(final IntegerContext ctx) {
+        final Integer data = Integer.parseInt(ctx.getText());
+        lastDeclType = Type.INT_TYPE;
+        return new AbstractSyntaxTree(NodeKind.INT_VAL_NODE, data, Type.INT_TYPE);
+    }
+
+    @Override
+    public AbstractSyntaxTree visitString_(final String_Context ctx) {
+        final String data = st.add(ctx.getText());
+        lastDeclType = Type.STR_TYPE;
+        return new AbstractSyntaxTree(NodeKind.STR_VAL_NODE, data, Type.STR_TYPE);
+    }
+
+    @Override
+    public AbstractSyntaxTree visitTypeName(final TypeNameContext ctx) {
+        checkTypeValid(ctx.IDENTIFIER().getSymbol());
+        return null;
+    }
+
     // Cria uma nova variável a partir do dado token.
     private AbstractSyntaxTree newVar(Token token) {
+
         String text = token.getText();
         int currentLine = token.getLine();
         Entry entry = vt.lookupVar(text);
         if (entry != null) {
             int originalLine = entry.getLine();
             logger.error(
-                    "SEMANTIC ERROR (%d): variable '%s' already declared at line %d.%n",
+                    "SEMANTIC ERROR ({}): variable '{}' already declared at line {}.\n",
                     currentLine, text, originalLine);
             System.exit(1);
         }
         entry = vt.addVar(text, currentLine, lastDeclType);
         return new AbstractSyntaxTree(NodeKind.VAR_USE_NODE, entry, lastDeclType);
     }
-    // ----------------------------------------------------------------------------
-    // Type checking and inference.
 
-    private void typeError(int lineNo, String op, Type t1, Type t2) {
-        logger.error("SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%s' and RHS is '%s'.%n",
-                lineNo, op, t1, t2);
-        System.exit(1);
+    @Override
+    public AbstractSyntaxTree visitVarDeclExplType(VarDeclExplTypeContext ctx) {
+
+        this.visit(ctx.type_());
+        Type declType = lastDeclType;
+        AbstractSyntaxTree node = AbstractSyntaxTree.newSubtree(NodeKind.VAR_DECL_NODE, Type.NO_TYPE);
+
+        List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
+        for (TerminalNode identifier : identifierList) {
+            node.addChildren(this.newVar(identifier.getSymbol()));
+        }
+
+        if (ctx.expressionList() != null) {
+            int quantIdentifier = ctx.identifierList().IDENTIFIER().size();
+
+            int quantExpression = ctx.expressionList().expression().size();
+
+            checkWrongAssignCount(ctx.start.getLine(), quantIdentifier, quantExpression);
+
+            for (int i = 0; i < quantIdentifier; i++) {
+                node.addChildren(this.visit(ctx.expressionList().expression(i)));
+                if (declType != lastDeclType) {
+                    typeError(ctx.start.getLine(), "=", declType, lastDeclType);
+                }
+
+            }
+
+        }
+
+        return node;
+
+    }
+
+    @Override
+    public AbstractSyntaxTree visitVarDeclImplType(VarDeclImplTypeContext ctx) {
+        int quantIdentifier = ctx.identifierList().IDENTIFIER().size();
+
+        int quantExpression = ctx.expressionList().expression().size();
+
+        checkWrongAssignCount(ctx.start.getLine(), quantIdentifier, quantExpression);
+
+        AbstractSyntaxTree node = AbstractSyntaxTree.newSubtree(NodeKind.VAR_DECL_NODE, Type.NO_TYPE);
+        for (int i = 0; i < quantIdentifier; i++) {
+            AbstractSyntaxTree expressionTree = this.visit(ctx.expressionList().expression(i));
+
+            node.addChildren(this.newVar(ctx.identifierList().IDENTIFIER(i).getSymbol()));
+            node.addChildren(expressionTree);
+        }
+        return node;
+    }
+
+    private void checkWrongAssignCount(int lineNo, int quantExpected, int quantReal) {
+        if (quantExpected != quantReal) {
+            logger.error("SEMANTIC ERROR ({}): cannot initialize '{}' variables with '{}' values",
+                    lineNo, quantExpected, quantReal);
+            System.exit(1);
+        }
     }
 
     private void checkAssign(int lineNo, Type l, Type r) {
@@ -73,91 +207,5 @@ public class SemanticChecker extends GoParserBaseVisitor<AbstractSyntaxTree> {
         }
 
     }
-
-    public void printTables() {
-
-        logger.info(st);
-        logger.info(vt);
-    }
-
-    private void checkBoolExpr(int lineNo, String cmd, Type t) {
-        if (t != Type.BOOL_TYPE) {
-            String typeText = t.toString();
-            String boolString = Type.BOOL_TYPE.toString();
-            logger.error("SEMANTIC ERROR (%d): conditional expression in '%s' is '%s' instead of '%s'.%n",
-                    lineNo, cmd, typeText, boolString);
-            System.exit(1);
-        }
-    }
-
-    private Type checkTypeValid(Token token) {
-        String text = token.getText();
-        int line = token.getLine();
-        Type t = TypeUtil.getTypeByIdentifier(text);
-        if (t == Type.NO_TYPE) {
-            logger.error("SEMANTIC ERROR (%d): Tipo %s não existe.%n",
-                    line, text);
-            System.exit(1);
-        }
-        return t;
-    }
-
-    @Override
-    public AbstractSyntaxTree visitTypeName(TypeNameContext ctx) {
-        return checkTypeValid(ctx.IDENTIFIER().getSymbol());
-    }
-
-    @Override
-    public AbstractSyntaxTree visitIdentifierList(IdentifierListContext ctx) {
-        for (TerminalNode identifier : ctx.IDENTIFIER()) {
-            this.checkVar(identifier.getSymbol());
-        }
-        return Type.NO_TYPE;
-    }
-
-    @Override
-    public AbstractSyntaxTree visitVarSpec(VarSpecContext ctx) {
-
-        Type rhsType = this.visit(ctx.type_());
-
-        List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
-        for (TerminalNode identifier : identifierList) {
-            this.newVar(identifier.getSymbol());
-        }
-
-        ExpressionListContext expressionList = ctx.expressionList();
-        Type lhsType = this.visit(expressionList);
-
-        if (expressionList != null) {
-
-            if (rhsType != lhsType) {
-                typeError(ctx.getToken(0, 0).getSymbol().getLine(), "=", lhsType, lhsType);
-            }
-            int quantExpressionList = 0;
-            if (expressionList.COMMA() != null) {
-                quantExpressionList = expressionList.COMMA().size() + 1;
-            }
-            if (identifierList.size() != quantExpressionList) {
-
-                logger.error("SEMANTIC ERROR (%d): cannot initialize %d variables with %d values%n",
-                        ctx.getToken(0, 0).getSymbol().getLine(), identifierList.size(), quantExpressionList);
-                System.exit(1);
-            }
-        }
-        return Type.NO_TYPE;
-    }
-
-    @Override
-    public AbstractSyntaxTree visitTypeSpec(TypeSpecContext ctx) {
-        if (ctx.ASSIGN() == null) {
-
-        } else {
-
-        }
-        return Type.NO_TYPE;
-    }
-
-    @Override
-    public AbstractSyntaxTree visitExpr
 
 }

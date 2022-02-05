@@ -9,12 +9,12 @@ import lombok.Getter;
 
 @Getter
 public class AbstractSyntaxTree {
-    private final NodeData data;
+    private final Object data;
     private final Type type;
     private final NodeKind kind;
     private final List<AbstractSyntaxTree> children;
 
-    public AbstractSyntaxTree(NodeKind kind, NodeData data, Type type) {
+    public AbstractSyntaxTree(final NodeKind kind, final Object data, final Type type) {
         this.data = data;
         this.type = type;
         this.kind = kind;
@@ -22,16 +22,17 @@ public class AbstractSyntaxTree {
     }
 
     // Adiciona um novos filhos ao nó.
-    public void addChildren(AbstractSyntaxTree... children) {
+    public void addChildren(final AbstractSyntaxTree... children) {
         Collections.addAll(this.children, children);
     }
 
     // Cria um nó e pendura todos os filhos passados como argumento.
-    public static AbstractSyntaxTree newSubtree(NodeKind kind, Type type, AbstractSyntaxTree... children) {
-        AbstractSyntaxTree node = new AbstractSyntaxTree(kind, null, type);
+    public static AbstractSyntaxTree newSubtree(final NodeKind kind, final Type type, final AbstractSyntaxTree... children) {
+        final AbstractSyntaxTree node = new AbstractSyntaxTree(kind, null, type);
 
         node.addChildren(children);
 
         return node;
     }
+
 }
