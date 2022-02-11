@@ -298,9 +298,13 @@ basicLit:
 	NIL_LIT
 	| integer
 	| string_
-	| FLOAT_LIT
+	| real
 	| IMAGINARY_LIT
 	| RUNE_LIT;
+
+
+real: 
+    FLOAT_LIT;
 
 integer:
 	DECIMAL_LIT

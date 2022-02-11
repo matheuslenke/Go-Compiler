@@ -10,7 +10,8 @@ ROOT=$(shell pwd)
 
 # Modifique aqui o path do seu antlr, ou só modifique a variavel ANTLR4 para o comando do seu antlr global
 ANTLR_PATH=/usr/local/lib/antlr-4.9-complete.jar
-CLASS_PATH_OPTION=-cp .:$(ANTLR_PATH)
+lombok=
+CLASS_PATH_OPTION=-cp .:$(ANTLR_PATH) 
 
 # Comandos como descritos na página do ANTLR.
 ANTLR4=$(JAVA) -jar $(ANTLR_PATH)
