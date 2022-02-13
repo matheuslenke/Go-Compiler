@@ -1,7 +1,9 @@
 package br.ufes.edu.compiladores.tables;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import br.ufes.edu.compiladores.typing.Type;
@@ -12,43 +14,58 @@ import lombok.Getter;
  */
 public final class VarTable {
 
-    private Map<String, Entry> table = new HashMap<>();
+    private List<Entry> table = new ArrayList<>();
 
-    public Entry lookupVar(String s) {
-        return this.table.get(s);
-    }
-
-    public Entry addVar(String s, int line, Type type) {
-        Entry value = new Entry(s, line, type);
-        this.table.put(s, value);
-        return value;
-    }
-
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb);
-        f.format("Variables table:%n");
-        this.table.forEach((String key, Entry value) -> f.format("Entry %s -- name: %s, line: %d, type: %s%n", key,
-                value.name, value.line, value.type.toString()));
-        f.close();
-        return sb.toString();
-    }
-
+	public int lookupVar(String s) {
+		for (int i = 0; i < table.size(); i++) {
+			if (table.get(i).name.equals(s)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	public int addVar(String s, int line, Type type) {
+		Entry entry = new Entry(s, line, type);
+		int idxAdded = table.size();
+		table.add(entry);
+		return idxAdded;
+	}
+	
+	public String getName(int i) {
+		return table.get(i).name;
+	}
+	
+	public int getLine(int i) {
+		return table.get(i).line;
+	}
+	
+	public Type getType(int i) {
+		return table.get(i).type;
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		Formatter f = new Formatter(sb);
+		f.format("Variables table:\n");
+		for (int i = 0; i < table.size(); i++) {
+			f.format("Entry %d -- name: %s, line: %d, type: %s\n", i,
+	                 getName(i), getLine(i), getType(i).toString());
+		}
+		f.close();
+		return sb.toString();
+	}
+	
     @Getter
-    public static final class Entry {
-        private final String name;
-        private final int line;
-        private final Type type;
-
-        @Override
-        public String toString() {
-            return this.name;
-        }
-
-        private Entry(String name, int line, Type type) {
-            this.name = name;
-            this.line = line;
-            this.type = type;
-        }
-    }
+	public static final class Entry {
+		private final String name;
+		private final int line;
+		private final Type type;
+		
+		Entry(String name, int line, Type type) {
+			this.name = name;
+			this.line = line;
+			this.type = type;
+		}
+	}
 }

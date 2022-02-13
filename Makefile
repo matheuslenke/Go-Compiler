@@ -9,7 +9,7 @@ JAVAC=javac
 ROOT=$(shell pwd)
 
 # Modifique aqui o path do seu antlr, ou só modifique a variavel ANTLR4 para o comando do seu antlr global
-ANTLR_PATH=/usr/local/lib/antlr-4.9-complete.jar
+ANTLR_PATH=/usr/local/lib/antlr/antlr-4.9.3-complete.jar
 lombok=
 CLASS_PATH_OPTION=-cp .:$(ANTLR_PATH) 
 

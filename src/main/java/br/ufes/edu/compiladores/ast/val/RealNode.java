@@ -4,7 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public class RealNode extends ValNode {
+public class RealNode implements ValNode {
     private final Double data;
+
+    public RealNode(Double data) {
+        this.data = data;
+    }
+
+    @Override
+    public String getValueAsString() {
+        return data.toString();
+    }
 }

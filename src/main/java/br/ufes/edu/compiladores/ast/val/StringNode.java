@@ -4,8 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public class StringNode extends ValNode {
+public class StringNode implements ValNode {
     private final String data;
 
+    public StringNode(String data) {
+        this.data = data;
+    }
+
+    @Override
+    public String getValueAsString() {
+        return data;
+    }
 }

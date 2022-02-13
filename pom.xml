@@ -93,12 +93,30 @@
                 <artifactId>antlr4test-maven-plugin</artifactId>
                 <version>${antlr4test-maven-plugin.version}</version>
                 <configuration>
-                    <verbose>false</verbose>
-                    <showTree>false</showTree>
-                    <enabled>false</enabled>
-                    <entryPoint>sourceFile</entryPoint>
-                    <grammarName>Go</grammarName>
-                    <packageName>br.ufes.edu.compiladores</packageName>
+                    <scenarios>
+                        <!-- <scenario>
+                            <scenarioName>TestAllFiles</scenarioName>
+                            <verbose>true</verbose>
+                            <showTree>false</showTree>
+                            <enabled>true</enabled>
+                            <entryPoint>sourceFile</entryPoint>
+                            <grammarName>Go</grammarName>
+                            <packageName>br.ufes.edu.compiladores</packageName>
+                            <testFileExtension>.go</testFileExtension>
+                            <exampleFiles>src/test/resources/examples</exampleFiles>
+                        </scenario> -->
+                        <scenario>
+                            <scenarioName>TestOneFile</scenarioName>
+                            <verbose>false</verbose>
+                            <showTree>false</showTree>
+                            <enabled>true</enabled>
+                            <entryPoint>sourceFile</entryPoint>
+                            <grammarName>Go</grammarName>
+                            <testFileExtension>.go</testFileExtension>
+                            <packageName>br.ufes.edu.compiladores</packageName>
+                            <exampleFiles>src/test/resources/exampleAlone</exampleFiles>
+                        </scenario>
+                    </scenarios>
                 </configuration>
                 <executions>
                     <execution>

@@ -16,7 +16,7 @@ func sqrt(x float64) string {
 	return fmt.Sprint(math.Sqrt(x))
 }
 
-func pow(x, n, lim float64) float64 {
+func pow(x, n, lim float64, int, int) float64 {
 	// If com declaracao e assignment de variavel
 	if v := math.Pow(x, n); v < lim {
 		return v

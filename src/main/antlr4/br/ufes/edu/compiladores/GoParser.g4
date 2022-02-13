@@ -1,4 +1,4 @@
-/*
+ /*
  [The "BSD licence"] Copyright (c) 2017 Sasa Coh, Michał Błotniak Copyright (c) 2019 Ivan Kochurkin,
  kvanttt@gmail.com, Positive Technologies Copyright (c) 2019 Dmitry Rassadin,
  flipparassa@gmail.com,Positive Technologies All rights reserved. Copyright (c) 2021 Martin Mirchev,
@@ -189,6 +189,8 @@ rangeClause: (
 	)? RANGE expression;
 
 goStmt: GO expression;
+
+paramType_: typeLit | literalType;
 
 type_: typeName | typeLit | L_PAREN type_ R_PAREN;
 

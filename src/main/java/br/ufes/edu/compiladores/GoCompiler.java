@@ -23,9 +23,10 @@ public class GoCompiler {
     private static Logger logger = LogManager.getLogger(GoCompiler.class);
 
     public static void main(String[] args) throws IOException {
+
         // Cria um CharStream que lê os caracteres de um arquivo.
         CharStream input = CharStreams
-                .fromFileName("D:\\Projetos\\Compiladores\\Go-Compiler\\src\\test\\resources\\examples\\varDecl.go");
+                .fromFileName(args[0]);
 
         // Cria um lexer que consome a entrada do CharStream.
         GoLexer lexer = new GoLexer(input);
@@ -51,6 +52,7 @@ public class GoCompiler {
 
         logger.info("PARSE SUCCESSFUL");
         checker.printTables();
+		checker.printAST();
 
     }
 }

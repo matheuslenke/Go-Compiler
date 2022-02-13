@@ -1,10 +1,17 @@
 package br.ufes.edu.compiladores.ast.val;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public class LongNode extends ValNode {
+public class LongNode implements ValNode {
     private final Long data;
+
+    public LongNode(Long data) {
+        this.data = data;
+    }
+
+    @Override
+    public String getValueAsString() {
+        return data.toString();
+    }
 }
