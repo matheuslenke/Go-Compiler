@@ -5,25 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="867b80f8-3f8f-410d-9ef1-53bb9e67e93e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser_lexer.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/antlr4/br/ufes/edu/compiladores/GoParser.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/antlr4/br/ufes/edu/compiladores/GoParser.g4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/GoCompiler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/GoCompiler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/AbstractSyntaxTree.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/NodeKind.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/NodeKind.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/VarDeclNode.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/VarUseNode.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/val/BooleanNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/val/BooleanNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/val/LongNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/val/LongNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/val/RealNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/val/RealNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/val/StringNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/val/StringNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/val/ValNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/val/ValNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/nodes/TypeNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/ast/nodes/TypeNode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/checker/SemanticChecker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/checker/SemanticChecker.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/tables/VarTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/tables/VarTable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/tables/TypeTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/tables/TypeTable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/typing/Type.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/typing/Type.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/resources/examples/ifStatements.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/resources/examples/ifStatements.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/resources/exampleAlone/bufChan.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/resources/exampleAlone/bufChan.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,7 +77,9 @@
       <option name="presentableId" value="Default" />
       <updated>1644770074745</updated>
       <workItem from="1644770076325" duration="4583000" />
-      <workItem from="1644794046417" duration="246000" />
+      <workItem from="1644794046417" duration="1089000" />
+      <workItem from="1644846986167" duration="3422000" />
+      <workItem from="1644860579325" duration="983000" />
     </task>
     <servers />
   </component>
@@ -99,9 +90,14 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/GoCompiler.java</url>
-          <line>54</line>
-          <option name="timeStamp" value="1" />
+          <url>file://$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/checker/SemanticChecker.java</url>
+          <line>425</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/br/ufes/edu/compiladores/checker/SemanticChecker.java</url>
+          <line>414</line>
+          <option name="timeStamp" value="20" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

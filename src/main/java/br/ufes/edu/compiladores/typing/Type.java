@@ -22,6 +22,16 @@ public enum Type {
             return "string";
         }
 	},
+	RUNE_TYPE {
+		public String toString() {
+			return "rune";
+		}
+	},
+	NIL_TYPE {
+		public String toString() {
+			return "nil";
+		}
+	},
 	NO_TYPE { // Indica um erro de tipos.
 		public String toString() {
             return "no_type";

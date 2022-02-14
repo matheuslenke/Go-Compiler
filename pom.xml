@@ -18,6 +18,7 @@
         <mojo.version>3.0.0</mojo.version>
         <antlr4.visitor>true</antlr4.visitor>
         <antlr4.listener>false</antlr4.listener>
+        <exec.mainClass>br.ufes.edu.compiladores.GoCompiler</exec.mainClass>
     </properties>
     <scm>
         <connection>https://github.com/matheuslenke/Go-Compiler.git</connection>
@@ -107,7 +108,7 @@
                         </scenario> -->
                         <scenario>
                             <scenarioName>TestOneFile</scenarioName>
-                            <verbose>false</verbose>
+                            <verbose>true</verbose>
                             <showTree>false</showTree>
                             <enabled>true</enabled>
                             <entryPoint>sourceFile</entryPoint>

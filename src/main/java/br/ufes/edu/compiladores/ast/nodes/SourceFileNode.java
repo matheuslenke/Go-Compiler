@@ -1,7 +1,9 @@
-package br.ufes.edu.compiladores.ast;
+package br.ufes.edu.compiladores.ast.nodes;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import br.ufes.edu.compiladores.ast.Node;
 import lombok.Getter;
 
 @Getter

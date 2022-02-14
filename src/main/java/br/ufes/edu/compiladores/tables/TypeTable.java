@@ -1,16 +1,14 @@
 package br.ufes.edu.compiladores.tables;
 import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import br.ufes.edu.compiladores.typing.Type;
 
 public class TypeTable {
     private List<Entry> table = new ArrayList<>();
 
-	public int lookupVar(String s) {
+	public int lookupType(String s) {
 		for (int i = 0; i < table.size(); i++) {
 			if (table.get(i).name.equals(s)) {
 				return i;
@@ -19,7 +17,7 @@ public class TypeTable {
 		return -1;
 	}
 	
-	public int addVar(String s, int line, Type type) {
+	public int addType(String s, int line, Type type) {
 		Entry entry = new Entry(s, line, type);
 		int idxAdded = table.size();
 		table.add(entry);
@@ -41,7 +39,7 @@ public class TypeTable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		Formatter f = new Formatter(sb);
-		f.format("Variables table:\n");
+		f.format("Types table:\n");
 		for (int i = 0; i < table.size(); i++) {
 			f.format("Entry %d -- name: %s, line: %d, type: %s\n", i,
 	                 getName(i), getLine(i), getType(i).toString());

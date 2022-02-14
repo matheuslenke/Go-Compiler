@@ -42,13 +42,16 @@ public enum NodeKind {
 
     // Declarações de Tipo
     TYPE_DECLARATION("type_declaration"),
+    TYPE_USE("type_use"),
     ARRAY_TYPE("array_type"),
     STRUCT_TYPE("struct_type"),
     FUNCTION_TYPE("function_type"),
     INTERFACE_TYPE("interface_type"),
     SLICE_TYPE("slice_type"),
     MAP_TYPE("map_type"),
-    CHANNEL_TYPE("channel_type")
+    CHANNEL_TYPE("channel_type"),
+    NIL_NODE("nil"),
+    CODE_BLOCK("block")
     ;
 
     private String token;

@@ -194,7 +194,7 @@ paramType_: typeLit | literalType;
 
 type_: typeName | typeLit | L_PAREN type_ R_PAREN;
 
-typeName: qualifiedIdent | IDENTIFIER;
+typeName: IDENTIFIER;
 
 typeLit:
 	arrayType
@@ -208,7 +208,7 @@ typeLit:
 
 arrayType: L_BRACKET arrayLength R_BRACKET elementType;
 
-arrayLength: expression;
+arrayLength: integer;
 
 elementType: type_;
 
@@ -297,12 +297,13 @@ operand: literal | operandName | L_PAREN expression R_PAREN;
 literal: basicLit | compositeLit | functionLit;
 
 basicLit:
-	NIL_LIT
-	| integer
-	| string_
-	| real
-	| IMAGINARY_LIT
-	| RUNE_LIT;
+	NIL_LIT #nilType
+	| integer #integerType
+	| string_ #stringType
+	| real #realType
+	// | IMAGINARY_LIT
+	// | RUNE_LIT #runeType
+;
 
 
 real: 
@@ -310,11 +311,11 @@ real:
 
 integer:
 	DECIMAL_LIT
-	| BINARY_LIT
-	| OCTAL_LIT
-	| HEX_LIT
-	| IMAGINARY_LIT
-	| RUNE_LIT;
+	// | BINARY_LIT
+	// | OCTAL_LIT
+	// | HEX_LIT
+	// | RUNE_LIT
+;
 
 operandName: IDENTIFIER (DOT IDENTIFIER)?;
 
