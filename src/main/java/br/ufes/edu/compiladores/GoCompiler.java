@@ -20,39 +20,39 @@ import br.ufes.edu.compiladores.checker.SemanticChecker;
 */
 
 public class GoCompiler {
-    private static Logger logger = LogManager.getLogger(GoCompiler.class);
+  private static Logger logger = LogManager.getLogger(GoCompiler.class);
 
-    public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException {
 
-        // Cria um CharStream que lê os caracteres de um arquivo.
-        CharStream input = CharStreams
-                .fromFileName(args[0]);
+    // Cria um CharStream que lê os caracteres de um arquivo.
+    CharStream input = CharStreams
+        .fromFileName(args[0]);
 
-        // Cria um lexer que consome a entrada do CharStream.
-        GoLexer lexer = new GoLexer(input);
+    // Cria um lexer que consome a entrada do CharStream.
+    GoLexer lexer = new GoLexer(input);
 
-        // Cria um buffer de tokens vindos do lexer.
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
+    // Cria um buffer de tokens vindos do lexer.
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-        // Cria um parser que consome os tokens do buffer.
-        GoParser parser = new GoParser(tokens);
+    // Cria um parser que consome os tokens do buffer.
+    GoParser parser = new GoParser(tokens);
 
-        // Começa o processo de parsing na regra 'sourceFile'.
-        ParseTree tree = parser.sourceFile();
+    // Começa o processo de parsing na regra 'sourceFile'.
+    ParseTree tree = parser.sourceFile();
 
-        if (parser.getNumberOfSyntaxErrors() != 0) {
-            // Houve algum erro sintático. Termina a compilação aqui.
-            return;
-        }
-
-        // Cria o analisador semântico e visita a ParseTree para
-        // fazer a análise.
-        SemanticChecker checker = new SemanticChecker();
-        checker.visit(tree);
-
-        logger.info("PARSE SUCCESSFUL");
-        checker.printTables();
-		checker.printAST();
-
+    if (parser.getNumberOfSyntaxErrors() != 0) {
+      // Houve algum erro sintático. Termina a compilação aqui.
+      return;
     }
+
+    // Cria o analisador semântico e visita a ParseTree para
+    // fazer a análise.
+    SemanticChecker checker = new SemanticChecker();
+    checker.visit(tree);
+
+    logger.info("PARSE SUCCESSFUL");
+    checker.printTables();
+    checker.printAST();
+
+  }
 }

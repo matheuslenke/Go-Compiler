@@ -2,10 +2,7 @@ package br.ufes.edu.compiladores.tables;
 
 import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import br.ufes.edu.compiladores.typing.Type;
 import lombok.Getter;
 

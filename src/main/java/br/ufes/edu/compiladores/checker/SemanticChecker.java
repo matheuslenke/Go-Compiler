@@ -1,45 +1,11 @@
 package br.ufes.edu.compiladores.checker;
 
-import br.ufes.edu.compiladores.GoParser.ArrayTypeContext;
-import br.ufes.edu.compiladores.GoParser.BlockContext;
-import br.ufes.edu.compiladores.GoParser.FunctionDeclContext;
-import br.ufes.edu.compiladores.GoParser.FunctionTypeContext;
-import br.ufes.edu.compiladores.GoParser.IdentifierListContext;
-import br.ufes.edu.compiladores.GoParser.ImportDeclContext;
-import br.ufes.edu.compiladores.GoParser.ImportSpecContext;
-import br.ufes.edu.compiladores.GoParser.IntegerContext;
-import br.ufes.edu.compiladores.GoParser.NilTypeContext;
-import br.ufes.edu.compiladores.GoParser.PackageClauseContext;
-import br.ufes.edu.compiladores.GoParser.ParameterDeclContext;
-import br.ufes.edu.compiladores.GoParser.ParametersContext;
-import br.ufes.edu.compiladores.GoParser.QualifiedIdentContext;
-import br.ufes.edu.compiladores.GoParser.RealContext;
-import br.ufes.edu.compiladores.GoParser.ResultContext;
-import br.ufes.edu.compiladores.GoParser.SignatureContext;
-import br.ufes.edu.compiladores.GoParser.SourceFileContext;
-import br.ufes.edu.compiladores.GoParser.StatementContext;
-import br.ufes.edu.compiladores.GoParser.String_Context;
-import br.ufes.edu.compiladores.GoParser.TypeLitContext;
-import br.ufes.edu.compiladores.GoParser.TypeNameContext;
-import br.ufes.edu.compiladores.GoParser.Type_Context;
+import br.ufes.edu.compiladores.GoParser.*;
 import br.ufes.edu.compiladores.GoParserBaseVisitor;
 import br.ufes.edu.compiladores.ast.AST;
-import br.ufes.edu.compiladores.ast.Node;
+import br.ufes.edu.compiladores.ast.EmptyData;
 import br.ufes.edu.compiladores.ast.NodeKind;
-import br.ufes.edu.compiladores.ast.nodes.ArrayNode;
-import br.ufes.edu.compiladores.ast.nodes.FunctionDeclNode;
-import br.ufes.edu.compiladores.ast.nodes.FunctionTypeNode;
-import br.ufes.edu.compiladores.ast.nodes.IdentifierListNode;
-import br.ufes.edu.compiladores.ast.nodes.IdentifierNode;
-import br.ufes.edu.compiladores.ast.nodes.NoTypeNode;
-import br.ufes.edu.compiladores.ast.nodes.ParameterNode;
-import br.ufes.edu.compiladores.ast.nodes.ParametersNode;
-import br.ufes.edu.compiladores.ast.nodes.QualifiedIdentifierNode;
-import br.ufes.edu.compiladores.ast.nodes.SignatureNode;
-import br.ufes.edu.compiladores.ast.nodes.SourceFileNode;
-import br.ufes.edu.compiladores.ast.nodes.TypeNode;
-import br.ufes.edu.compiladores.ast.nodes.VarUseNode;
-import br.ufes.edu.compiladores.ast.val.*;
+import br.ufes.edu.compiladores.ast.VariableData;
 import br.ufes.edu.compiladores.tables.StrTable;
 import br.ufes.edu.compiladores.tables.VarTable;
 import br.ufes.edu.compiladores.typing.Type;
@@ -74,35 +40,36 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             System.exit(1);
         }
 
-        return new AST(NodeKind.VAR_USE_NODE, new VarUseNode(index), vt.getType(index));
+        return new AST(NodeKind.VAR_USE_NODE, new VariableData(index), vt.getType(index));
     }
-    
+
     // Cria uma nova variável a partir do dado token.
     AST newVar(Token token) {
         String text = token.getText();
         int currentLine = token.getLine();
         Integer index = vt.lookupVar(text);
         if (index != -1) {
-            // int originalLine = entry.getLine(); 
+            // int originalLine = entry.getLine();
             logger.error(
                     "SEMANTIC ERROR ({}): variable '{}' already declared at line {}.\n",
                     currentLine, text, currentLine);
             System.exit(1);
         }
-        Integer idx =  vt.addVar(text, currentLine, lastDeclType);
+        Integer idx = vt.addVar(text, currentLine, lastDeclType);
+        System.out.println("Index criado da variável: " + idx);
         Type t = vt.getType(idx);
         System.out.println("Text da variável: " + text);
         switch (t) {
             case STR_TYPE:
-                return new AST(NodeKind.VAR_DECL_NODE, new StringNode(text), lastDeclType);
+                return new AST(NodeKind.VAR_DECL_NODE, new VariableData(idx), lastDeclType);
             case BOOL_TYPE:
-                return new AST(NodeKind.VAR_DECL_NODE, new BooleanNode(Boolean.valueOf(text)), lastDeclType);
+                return new AST(NodeKind.VAR_DECL_NODE, new VariableData(idx), lastDeclType);
             case FLOAT_TYPE:
-                return new AST(NodeKind.VAR_DECL_NODE, new RealNode(Double.valueOf(text)), lastDeclType);
+                return new AST(NodeKind.VAR_DECL_NODE, new VariableData(idx), lastDeclType);
             case INT_TYPE:
-                return new AST(NodeKind.VAR_DECL_NODE, new LongNode(Long.valueOf(text)), lastDeclType);
+                return new AST(NodeKind.VAR_DECL_NODE, new VariableData(idx), lastDeclType);
             case NO_TYPE:
-                return new AST(NodeKind.VAR_DECL_NODE, new NoTypeNode(), lastDeclType);
+                return new AST(NodeKind.VAR_DECL_NODE, new EmptyData(), lastDeclType);
             default:
                 throw new Error();
         }
@@ -123,52 +90,54 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         System.out.print("\n\n");
         System.out.print(st);
         System.out.print("\n\n");
-    	System.out.print(vt);
-    	System.out.print("\n\n");
+        System.out.print(vt);
+        System.out.print("\n\n");
     }
 
     // Exibe a AST no formato DOT em stderr.
     public void printAST() {
-    	AST.printDot(root, vt);
+        AST.printDot(root, vt);
     }
 
-    //  Checkers
+    // Checkers
     // ----------------------------------------------------------------------------
 
-    // private void checkBoolExpr(final int lineNo, final String cmd, final Type t) {
-    //     if (t != Type.BOOL_TYPE) {
-    //         final String typeText = t.toString();
-    //         final String boolString = Type.BOOL_TYPE.toString();
-    //         this.logger.error("SEMANTIC ERROR ({}): conditional expression in '{}' is '{}' instead of '{}'.\n",
-    //                 lineNo, cmd, typeText, boolString);
-    //         System.exit(1);
-    //     }
+    // private void checkBoolExpr(final int lineNo, final String cmd, final Type t)
+    // {
+    // if (t != Type.BOOL_TYPE) {
+    // final String typeText = t.toString();
+    // final String boolString = Type.BOOL_TYPE.toString();
+    // this.logger.error("SEMANTIC ERROR ({}): conditional expression in '{}' is
+    // '{}' instead of '{}'.\n",
+    // lineNo, cmd, typeText, boolString);
+    // System.exit(1);
+    // }
     // }
 
-     private void checkTypeValid(final Token token) {
-         final String text = token.getText();
-         final int line = token.getLine();
-         final Type t = TypeUtil.getTypeByIdentifier(text);
-         if (t == null) {
-             this.logger.error("SEMANTIC ERROR ({}): Type '{}' doesn't exist.\n",
-                     line, text);
-             System.exit(1);
-         }
-         this.lastDeclType = t;
-     }
+    private void checkTypeValid(final Token token) {
+        final String text = token.getText();
+        final int line = token.getLine();
+        final Type t = TypeUtil.getTypeByIdentifier(text);
+        if (t == null) {
+            this.logger.error("SEMANTIC ERROR ({}): Type '{}' doesn't exist.\n",
+                    line, text);
+            System.exit(1);
+        }
+        this.lastDeclType = t;
+    }
 
-    // private void checkWrongAssignCount(int lineNo, int quantExpected, int quantReal) {
-    //     if (quantExpected != quantReal) {
-    //         logger.error("SEMANTIC ERROR ({}): cannot initialize '{}' variables with '{}' values",
-    //                 lineNo, quantExpected, quantReal);
-    //         System.exit(1);
-    //     }
-    // }
+    private void checkWrongAssignCount(int lineNo, int quantExpected, int quantReal) {
+        if (quantExpected != quantReal) {
+            logger.error("SEMANTIC ERROR ({}): cannot initialize '{}' variables with '{}' values",
+                    lineNo, quantExpected, quantReal);
+            System.exit(1);
+        }
+    }
 
     // private void checkAssign(int lineNo, Type l, Type r) {
-    //     if (l != r) {
-    //         typeError(lineNo, ":=", l, r);
-    //     }
+    // if (l != r) {
+    // typeError(lineNo, ":=", l, r);
+    // }
 
     // }
 
@@ -176,24 +145,26 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     // Visitadores.
 
     // Regra inicial!
-    // Visita a regra 
+    // Visita a regra
     // sourceFile: packageClause eos (importDecl eos)* (
     // (functionDecl| methodDecl | declaration) eos)* EOF;
     @Override
     public AST visitSourceFile(final SourceFileContext ctx) {
         // Visita recursivamente os filhos para construir a AST.
 
-        AST packageClause = visit(ctx.packageClause());
-        AST importDeclClause = AST.newSubtree(NodeKind.IMPORT_LIST_NODE, Type.NO_TYPE);
+        // AST packageClause = visit(ctx.packageClause());
+        // AST importDeclClause = AST.newSubtree(NodeKind.IMPORT_LIST_NODE,
+        // Type.NO_TYPE);
 
-        for (final ImportDeclContext importDeclContext : ctx.importDecl()) {
-            AST child = visit(importDeclContext);
-            if( child != null) {
-                importDeclClause.addChildren(child);
-            }
-        }
+        // for (final ImportDeclContext importDeclContext : ctx.importDecl()) {
+        // AST child = visit(importDeclContext);
+        // if( child != null) {
+        // importDeclClause.addChildren(child);
+        // }
+        // }
+        logger.info("Visitando raiz");
 
-        this.root = AST.newSubtree(NodeKind.SOURCE_FILE, Type.NO_TYPE, packageClause, importDeclClause);
+        this.root = AST.newSubtree(NodeKind.SOURCE_FILE, Type.NO_TYPE);
 
         for (final FunctionDeclContext functionDeclContext : ctx.functionDecl()) {
             AST functionDecl = visit(functionDeclContext);
@@ -201,44 +172,18 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 this.root.addChildren(functionDecl);
             }
         }
-
-        // for (final DeclarationContext declContext : ctx.declaration()) {
-        //     node.addDeclaration((DeclarationNode) this.visit(declContext));
-        // }
-
-
-        return this.root;
-    }
-
-    // packageClause: PACKAGE packageName = IDENTIFIER;
-    @Override
-    public AST visitPackageClause(PackageClauseContext ctx) {
-        return new AST(NodeKind.PACKAGE_NODE, new PackageNode(ctx.packageName.getText()), Type.NO_TYPE);
-    }
-
-    // importDecl:
-	// IMPORT (importSpec | L_PAREN (importSpec eos)* R_PAREN);
-    @Override
-    public AST visitImportDecl(final ImportDeclContext ctx) {
-
-        AST node = AST.newSubtree(NodeKind.IMPORT_DECL, Type.NO_TYPE);
-        for (final ImportSpecContext specCtx : ctx.importSpec()) {
-            AST child = visit(specCtx);
+        for (DeclarationContext declarationCtx : ctx.declaration()) {
+            AST child = visit(declarationCtx.varDecl());
             if (child != null) {
-                node.addChildren(child);
+                this.root.addChildren(child);
             }
         }
-        return node;
-    }
 
-    // importSpec: alias = (DOT | IDENTIFIER)? importPath;
-    @Override
-    public AST visitImportSpec(final ImportSpecContext ctx) {
-        if (ctx.alias == null ) {
-            return new AST(NodeKind.IMPORT_SPEC, new BooleanNode.ImportNode(ctx.importPath().getText()), Type.NO_TYPE);
-        } else {
-            return new AST(NodeKind.IMPORT_SPEC, new BooleanNode.ImportNode(ctx.alias.getText() + ctx.importPath().getText()), Type.NO_TYPE);
-        }
+        // for (final DeclarationContext declContext : ctx.declaration()) {
+        // node.addDeclaration((DeclarationNode) this.visit(declContext));
+        // }
+
+        return this.root;
     }
 
     // functionDecl: FUNC IDENTIFIER (signature block?);
@@ -247,8 +192,11 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         String funcName = ctx.IDENTIFIER().getText();
 
         AST signature = visit(ctx.signature());
+        lastDeclType = Type.STR_TYPE;
+        AST funcVar = newVar(ctx.IDENTIFIER().getSymbol());
 
-        AST decl = new AST(NodeKind.FUNCTION_DECLARATION, new FunctionDeclNode(funcName), Type.NO_TYPE);
+        AST decl = new AST(NodeKind.FUNCTION_DECLARATION, new VariableData(funcVar.getData().getIndex()),
+                Type.NO_TYPE);
         if (signature != null) {
             decl.addChildren(signature);
         }
@@ -260,104 +208,114 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             if (child != null) {
                 block.addChildren(child);
             }
-        } 
+        }
         decl.addChildren(block);
         // Falta adicionar bloco de código
         return decl;
     }
 
-    @Override
-    public AST visitStatement( StatementContext ctx) {
-        if (ctx.declaration() != null) {
-            if (ctx.declaration().varDecl() != null) {
-                ctx.declaration().varDecl().
-            }
-        }
-    }
+    // @Override
+    // public AST visitStatement( StatementContext ctx) {
+    // if (ctx.declaration() != null) {
+    // if (ctx.declaration().varDecl() != null) {
+    // // ctx.declaration().varDecl().
+    // }
+    // }
+    // }
 
     // signature:
-	// {noTerminatorAfterParams(1)}? parameters result
-	// | parameters;
-    @Override
-    public AST visitSignature(final SignatureContext ctx) {
-        AST parameters = null;
-        AST result = null;
-        if (ctx.parameters() != null) {
-            parameters = visit(ctx.parameters());
-        }
-        if (ctx.result() != null) {
-            result =  visit(ctx.result());
-        }
+    // {noTerminatorAfterParams(1)}? parameters result
+    // | parameters;
+    // @Override
+    // public AST visitSignature(final SignatureContext ctx) {
+    // AST parameters = null;
+    // AST result = null;
+    // if (ctx.parameters() != null) {
+    // parameters = visit(ctx.parameters());
+    // }
+    // if (ctx.result() != null) {
+    // result = visit(ctx.result());
+    // }
 
-        AST p = new AST(NodeKind.SIGNATURE_NODE, new SignatureNode(), Type.NO_TYPE);
+    // AST p = new AST(NodeKind.SIGNATURE_NODE, new SignatureNode(), Type.NO_TYPE);
 
-        if(parameters != null) {
-            p.addChildren(parameters);
-        }
-        if (result != null) {
-            p.addChildren(result);
-        }
-        return p;
-    }
+    // if(parameters != null) {
+    // p.addChildren(parameters);
+    // }
+    // if (result != null) {
+    // p.addChildren(result);
+    // }
+    // return p;
+    // }
 
     // parameters:
-	// L_PAREN (parameterDecl (COMMA parameterDecl)* COMMA?)? R_PAREN;
-    @Override
-    public AST visitParameters(final ParametersContext ctx) {
-        AST parameters = new AST(NodeKind.PARAMETERS_NODE, new ParametersNode(), Type.NO_TYPE);
-        for (final ParameterDeclContext paramterDeclCtx : ctx.parameterDecl()) {
-            AST child = visit(paramterDeclCtx);
-            if (child != null) {
-                parameters.addChildren(child);
-            }
-        }
-        return parameters;
-    }
+    // L_PAREN (parameterDecl (COMMA parameterDecl)* COMMA?)? R_PAREN;
+    // @Override
+    // public AST visitParameters(final ParametersContext ctx) {
+    // AST parameters = new AST(NodeKind.PARAMETERS_NODE, new ParametersNode(),
+    // Type.NO_TYPE);
+    // for (final ParameterDeclContext paramterDeclCtx : ctx.parameterDecl()) {
+    // AST child = visit(paramterDeclCtx);
+    // if (child != null) {
+    // parameters.addChildren(child);
+    // }
+    // }
+    // return parameters;
+    // }
 
     // parameterDecl: identifierList? ELLIPSIS? type_;
-    @Override
-    public AST visitParameterDecl(final ParameterDeclContext ctx) {
-        AST type = visit(ctx.type_());
-        lastDeclType = type.getType();
-        AST identifiers = null;
-        if(ctx.identifierList() != null) {
-            identifiers = visit(ctx.identifierList());
-        }
+    // @Override
+    // public AST visitParameterDecl(final ParameterDeclContext ctx) {
+    // AST type = visit(ctx.type_());
+    // lastDeclType = type.getType();
+    // AST identifiers = null;
+    // if(ctx.identifierList() != null) {
+    // identifiers = visit(ctx.identifierList());
+    // }
 
-        AST parameterDecl = new AST(NodeKind.PARAMETER_DECLARATION, new ParameterNode(), Type.NO_TYPE);
-        parameterDecl.addChildren(type, identifiers);
-        return parameterDecl;
-    }
+    // AST parameterDecl = new AST(NodeKind.PARAMETER_DECLARATION, new
+    // ParameterNode(), Type.NO_TYPE);
+    // parameterDecl.addChildren(type, identifiers);
+    // return parameterDecl;
+    // }
 
     // result: parameters | type_;
-    @Override
-    public AST visitResult(final ResultContext ctx) {
-        AST parameters = visit(ctx.parameters());
-        if(parameters != null) {
-            return parameters;
-        } else {
-            return visit(ctx.type_());
-        }
-    } 
+    // @Override
+    // public AST visitResult(final ResultContext ctx) {
+    // AST parameters = visit(ctx.parameters());
+    // if(parameters != null) {
+    // return parameters;
+    // } else {
+    // return visit(ctx.type_());
+    // }
+    // }
 
     // type_: typeName | typeLit | L_PAREN type_ R_PAREN;
-     @Override
-     public AST visitType_(final Type_Context ctx) {
+    @Override
+    public AST visitType_(final Type_Context ctx) {
+        if (ctx.typeLit() != null) {
+            visit(ctx.typeLit());
+        }
 
-         AST typeName = null;
-         if (ctx.typeName() != null) {
-             typeName = visit(ctx.typeName());
-         }
-         if(typeName != null) {
-             return typeName;
-         }
+        AST typeName = null;
+        if (ctx.typeName() != null) {
+            typeName = visit(ctx.typeName());
+        }
+        if (typeName != null) {
+            return typeName;
+        }
+        if (ctx.type_() != null) {
+            visit(ctx.type_());
+        }
+        return null;
+    }
 
-         AST typeLit = visit(ctx.typeLit());
-         if(typeLit != null) {
-             return typeLit;
-         }
-         return visit(ctx.type_());
-     }
+    // AST typeLit = visit(ctx.typeLit());
+    // if(typeLit != null) {
+    // return typeLit;
+    // }
+    // return visit(ctx.type_());
+    // }
 
     // typeName: qualifiedIdent | IDENTIFIER;
     @Override
@@ -365,92 +323,97 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         Token token = ctx.IDENTIFIER().getSymbol();
         checkTypeValid(token);
 
-        return new AST(NodeKind.TYPE_USE, new TypeNode(token.getText()), lastDeclType);
+        return new AST(NodeKind.TYPE_USE, new EmptyData(), lastDeclType);
     }
 
     // typeLit:
-	// arrayType| structType| pointerType| functionType| interfaceType| sliceType| mapType| channelType;
-    @Override
-    public AST visitTypeLit(final TypeLitContext ctx) {
-        AST literal = null;
+    // arrayType| structType| pointerType| functionType| interfaceType| sliceType|
+    // mapType| channelType;
+    // @Override
+    // public AST visitTypeLit(final TypeLitContext ctx) {
+    // AST literal = null;
 
-        if(ctx.arrayType() != null) {
-            literal = visit(ctx.arrayType());
-        } else if (ctx.structType() != null) {
-            literal = visit(ctx.structType());
-        } else if (ctx.pointerType() != null) {
-            literal = visit(ctx.pointerType());
-        } else if (ctx.functionType() != null) {
-            literal = visit(ctx.functionType());
-        } else if (ctx.interfaceType() != null) {
-            literal = visit(ctx.interfaceType());
-        } else if (ctx.sliceType() != null) {
-            literal = visit(ctx.sliceType());
-        } else if (ctx.mapType() != null) {
-            literal = visit(ctx.mapType());
-        } else if (ctx.channelType() != null) {
-            literal = visit(ctx.channelType());
-        }
-        return literal;
-    }
+    // if(ctx.arrayType() != null) {
+    // literal = visit(ctx.arrayType());
+    // } else if (ctx.structType() != null) {
+    // literal = visit(ctx.structType());
+    // } else if (ctx.pointerType() != null) {
+    // literal = visit(ctx.pointerType());
+    // } else if (ctx.functionType() != null) {
+    // literal = visit(ctx.functionType());
+    // } else if (ctx.interfaceType() != null) {
+    // literal = visit(ctx.interfaceType());
+    // } else if (ctx.sliceType() != null) {
+    // literal = visit(ctx.sliceType());
+    // } else if (ctx.mapType() != null) {
+    // literal = visit(ctx.mapType());
+    // } else if (ctx.channelType() != null) {
+    // literal = visit(ctx.channelType());
+    // }
+    // return literal;
+    // }
 
     // arrayType: L_BRACKET arrayLength R_BRACKET elementType;
-    @Override
-    public AST visitArrayType(final ArrayTypeContext ctx) {
-        AST type = visit(ctx.elementType());
+    // @Override
+    // public AST visitArrayType(final ArrayTypeContext ctx) {
+    // AST type = visit(ctx.elementType());
 
-        AST size = visit(ctx.arrayLength().getChild(0));
+    // AST size = visit(ctx.arrayLength()); //
 
-        AST array = new AST(NodeKind.ARRAY_TYPE, new ArrayNode(), Type.NO_TYPE);
+    // AST array = new AST(NodeKind.ARRAY_TYPE, new EmptyData(), Type.NO_TYPE);
 
-        array.addChildren(type, size);
-        return array;
-    }
+    // array.addChildren(type, size);
+    // return array;
+    // }
 
     // functionType: FUNC signature;
-    @Override
-    public AST visitFunctionType(final FunctionTypeContext ctx) {
-        AST signature = visit(ctx.signature());
+    // @Override
+    // public AST visitFunctionType(final FunctionTypeContext ctx) {
+    // AST signature = visit(ctx.signature());
 
-        AST funcType = new AST(NodeKind.FUNCTION_TYPE, new FunctionTypeNode(), Type.NO_TYPE);
-        if (signature != null) {
-            funcType.addChildren(signature);
-        }
-        return funcType;
-    }
-    
+    // AST funcType = new AST(NodeKind.FUNCTION_TYPE, new EmptyData(),
+    // Type.NO_TYPE);
+    // if (signature != null) {
+    // funcType.addChildren(signature);
+    // }
+    // return funcType;
+    // }
+
     // qualifiedIdent: IDENTIFIER DOT IDENTIFIER;
     // @Override
     // public AST visitQualifiedIdent(final QualifiedIdentContext ctx) {
-    //     AST parent = new AST(NodeKind.QUALIFIED_IDENTIFIER_NODE, new QualifiedIdentifierNode(), Type.NO_TYPE);
+    // AST parent = new AST(NodeKind.QUALIFIED_IDENTIFIER_NODE, new
+    // QualifiedIdentifierNode(), Type.NO_TYPE);
 
-    //     AST child1 = new AST(NodeKind.IDENTIFIER, new IdentifierNode(ctx.IDENTIFIER(0).getText()), Type.STR_TYPE);
-    //     AST child2 = new AST(NodeKind.IDENTIFIER, new IdentifierNode(ctx.IDENTIFIER(1).getText()), Type.STR_TYPE);
-    //     lastDeclType = Type.STR_TYPE;
-    //     parent.addChildren(child1, child2);
-    //     return parent;
+    // AST child1 = new AST(NodeKind.IDENTIFIER, new
+    // IdentifierNode(ctx.IDENTIFIER(0).getText()), Type.STR_TYPE);
+    // AST child2 = new AST(NodeKind.IDENTIFIER, new
+    // IdentifierNode(ctx.IDENTIFIER(1).getText()), Type.STR_TYPE);
+    // lastDeclType = Type.STR_TYPE;
+    // parent.addChildren(child1, child2);
+    // return parent;
     // }
 
+    // @Override
+    // public AST visitIdentifierList(final IdentifierListContext ctx) {
+    // AST parent = new AST(NodeKind.IDENTIFIER_LIST_NODE, new EmptyData(),
+    // Type.NO_TYPE);
 
-    @Override
-    public AST visitIdentifierList(final IdentifierListContext ctx) {
-        AST parent = new AST(NodeKind.IDENTIFIER_LIST_NODE, new IdentifierListNode(), Type.NO_TYPE);
+    // if (ctx.IDENTIFIER() == null) { return null; }
 
-        if (ctx.IDENTIFIER() == null) { return null; }
-
-        for (final TerminalNode node : ctx.IDENTIFIER()) {
-            AST id = new AST(NodeKind.IDENTIFIER, new IdentifierNode(node.getSymbol().getText()),  Type.STR_TYPE);
-            if(id != null) {
-                parent.addChildren(id);
-                // newVar(node.getSymbol());
-            }
-        }
-        return parent;
-    }
+    // for (final TerminalNode node : ctx.IDENTIFIER()) {
+    // AST id = new AST(NodeKind.IDENTIFIER, new
+    // IdentifierNode(node.getSymbol().getText()), Type.STR_TYPE);
+    // if(id != null) {
+    // parent.addChildren(id);
+    // // newVar(node.getSymbol());
+    // }
+    // }
+    // return parent;
+    // }
 
     // @Override
     // public AST visitBlock(final BlockContext ctx) {
-
 
     // }
 
@@ -458,91 +421,85 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     @Override
     public AST visitInteger(final IntegerContext ctx) {
-        final Long data = Long.parseLong(ctx.getText());
         lastDeclType = Type.INT_TYPE;
-        return new AST(NodeKind.INT_VAL_NODE, new LongNode(data), Type.INT_TYPE);
+        return null;
     }
 
     @Override
     public AST visitString_(final String_Context ctx) {
-        final String data = st.add(ctx.getText());
         lastDeclType = Type.STR_TYPE;
-        return new AST(NodeKind.STR_VAL_NODE, new StringNode(data), Type.STR_TYPE);
+        return null;
     }
 
     @Override
     public AST visitReal(final RealContext ctx) {
-        final Double data = Double.parseDouble(ctx.getText());
         lastDeclType = Type.FLOAT_TYPE;
-        return new AST(NodeKind.REAL_VAL_NODE, new RealNode(data), Type.FLOAT_TYPE);
+        return null;
     }
 
     @Override
-    public AST visitNilType (final NilTypeContext ctx) {
-        return new AST(NodeKind.NIL_NODE, new NilNode(), Type.NIL_TYPE);
+    public AST visitNilType(final NilTypeContext ctx) {
+        return null;
     }
 
+    @Override
+    public AST visitRuneType(final RuneTypeContext ctx) {
+        lastDeclType = Type.RUNE_TYPE;
+        return null;
+    }
 
     // <----------------------------------------------->
 
     // @Override
     // public AST visitTypeName(final TypeNameContext ctx) {
-    //     checkTypeValid(ctx.IDENTIFIER().getSymbol());
-    //     return null;
+    // checkTypeValid(ctx.IDENTIFIER().getSymbol());
+    // return null;
     // }
 
-  
+    @Override
+    public AST visitVarDeclExplType(VarDeclExplTypeContext ctx) {
+        this.visit(ctx.type_());
+        Type declType = lastDeclType;
+        AST variableDeclaration = new AST(NodeKind.VAR_LIST_NODE, new EmptyData(), Type.NO_TYPE);
 
-    // @Override
-    // public AST visitVarDeclExplType(VarDeclExplTypeContext ctx) {
+        List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
+        for (TerminalNode identifier : identifierList) {
+            variableDeclaration.addChildren(this.newVar(identifier.getSymbol()));
+        }
 
-    //     this.visit(ctx.type_());
-    //     Type declType = lastDeclType;
-    //     VarDeclNode node = new VarDeclNode();
+        if (ctx.expressionList() != null) {
+            int quantIdentifier = ctx.identifierList().IDENTIFIER().size();
 
-    //     List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
-    //     for (TerminalNode identifier : identifierList) {
-    //         node.addVariable(this.newVar(identifier.getSymbol()));
-    //     }
+            int quantExpression = ctx.expressionList().expression().size();
 
-    //     if (ctx.expressionList() != null) {
-    //         int quantIdentifier = ctx.identifierList().IDENTIFIER().size();
+            checkWrongAssignCount(ctx.start.getLine(), quantIdentifier, quantExpression);
 
-    //         int quantExpression = ctx.expressionList().expression().size();
+            for (int i = 0; i < quantIdentifier; i++) {
+                // node.addValue((ValNode) this.visit(ctx.expressionList().expression(i)));
+                // if (declType != lastDeclType) {
+                // typeError(ctx.start.getLine(), "=", declType, lastDeclType);
+                // }
+            }
+        }
 
-    //         checkWrongAssignCount(ctx.start.getLine(), quantIdentifier, quantExpression);
-
-    //         for (int i = 0; i < quantIdentifier; i++) {
-    //             node.addValue((ValNode) this.visit(ctx.expressionList().expression(i)));
-    //             if (declType != lastDeclType) {
-    //                 typeError(ctx.start.getLine(), "=", declType, lastDeclType);
-    //             }
-
-    //         }
-
-    //     }
-
-    //     return node;
-
-    // }
+        return variableDeclaration;
+    }
 
     // @Override
     // public VarDeclNode visitVarDeclImplType(VarDeclImplTypeContext ctx) {
-    //     int quantIdentifier = ctx.identifierList().IDENTIFIER().size();
+    // int quantIdentifier = ctx.identifierList().IDENTIFIER().size();
 
-    //     int quantExpression = ctx.expressionList().expression().size();
+    // int quantExpression = ctx.expressionList().expression().size();
 
-    //     checkWrongAssignCount(ctx.start.getLine(), quantIdentifier, quantExpression);
-    //     VarDeclNode node = new VarDeclNode();
-    //     for (int i = 0; i < quantIdentifier; i++) {
-    //         ValNode valueNode = (ValNode) this.visit(ctx.expressionList().expression(i));
+    // checkWrongAssignCount(ctx.start.getLine(), quantIdentifier, quantExpression);
+    // VarDeclNode node = new VarDeclNode();
+    // for (int i = 0; i < quantIdentifier; i++) {
+    // ValNode valueNode = (ValNode) this.visit(ctx.expressionList().expression(i));
 
-    //         node.addVariable(this.newVar(ctx.identifierList().IDENTIFIER(i).getSymbol()));
-    //         node.addValue(valueNode);
-    //     }
-    //     return node;
+    // node.addVariable(this.newVar(ctx.identifierList().IDENTIFIER(i).getSymbol()));
+    // node.addValue(valueNode);
     // }
-
-
+    // return node;
+    // }
 
 }

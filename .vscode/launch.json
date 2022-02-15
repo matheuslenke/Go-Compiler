@@ -6,16 +6,11 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        },
-        {
-            "type": "java",
             "name": "Launch GoCompiler",
             "request": "launch",
             "mainClass": "br.ufes.edu.compiladores.GoCompiler",
-            "projectName": "go-compiler"
+            "projectName": "go-compiler",
+            "args": "/Users/matheuslenke/Developer/College/2021-2/Compilers/Go-Compiler/src/test/resources/exampleAlone/bufChan.go"
         }
     ]
 }

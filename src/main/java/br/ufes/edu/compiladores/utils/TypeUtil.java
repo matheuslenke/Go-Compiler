@@ -21,7 +21,21 @@ public class TypeUtil {
         // hiding constructor
     }
 
-    public static Type getTypeByIdentifier(String identifier){
+    public static Type getTypeByIdentifier(String identifier) {
+        switch (identifier) {
+            case "float32":
+                identifier = "float";
+                break;
+            case "float64":
+                identifier = "float";
+                break;
+            case "int32":
+                identifier = "int";
+                break;
+            case "int64":
+                identifier = "int";
+                break;
+        }
         return TypeUtil.types.get(identifier);
     }
 }

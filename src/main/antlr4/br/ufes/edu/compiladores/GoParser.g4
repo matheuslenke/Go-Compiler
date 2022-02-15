@@ -208,7 +208,7 @@ typeLit:
 
 arrayType: L_BRACKET arrayLength R_BRACKET elementType;
 
-arrayLength: integer;
+arrayLength: expression;
 
 elementType: type_;
 
@@ -301,8 +301,8 @@ basicLit:
 	| integer #integerType
 	| string_ #stringType
 	| real #realType
-	// | IMAGINARY_LIT
-	// | RUNE_LIT #runeType
+	| IMAGINARY_LIT #imaginaryType
+	| RUNE_LIT #runeType
 ;
 
 
@@ -311,10 +311,10 @@ real:
 
 integer:
 	DECIMAL_LIT
-	// | BINARY_LIT
-	// | OCTAL_LIT
-	// | HEX_LIT
-	// | RUNE_LIT
+	| BINARY_LIT
+	| OCTAL_LIT
+	| HEX_LIT
+	| RUNE_LIT
 ;
 
 operandName: IDENTIFIER (DOT IDENTIFIER)?;
@@ -371,9 +371,8 @@ arguments:
 
 methodExpr: receiverType DOT IDENTIFIER;
 
-//receiverType: typeName | '(' ('*' typeName | receiverType) ')';
+receiverType: typeName | '(' ('*' typeName | receiverType) ')';
 
-receiverType: type_;
 
 eos:
 	SEMI
