@@ -32,6 +32,11 @@ public enum Type {
 			return "nil";
 		}
 	},
+	FUNC_TYPE {
+		public String toString() {
+			return "func";
+		}
+	},
 	NO_TYPE { // Indica um erro de tipos.
 		public String toString() {
 			return "no_type";

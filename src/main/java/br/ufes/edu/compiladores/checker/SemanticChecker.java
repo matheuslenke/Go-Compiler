@@ -56,9 +56,9 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             System.exit(1);
         }
         Integer idx = vt.addVar(text, currentLine, lastDeclType);
-        System.out.println("Index criado da variável: " + idx);
+        // System.out.println("Index criado da variável: " + idx);
         Type t = vt.getType(idx);
-        System.out.println("Text da variável: " + text);
+        // System.out.println("Text da variável: " + text);
         switch (t) {
             case STR_TYPE:
                 return new AST(NodeKind.VAR_DECL_NODE, new VariableData(idx), lastDeclType);
@@ -192,7 +192,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         String funcName = ctx.IDENTIFIER().getText();
 
         AST signature = visit(ctx.signature());
-        lastDeclType = Type.STR_TYPE;
+        lastDeclType = Type.FUNC_TYPE;
         AST funcVar = newVar(ctx.IDENTIFIER().getSymbol());
 
         AST decl = new AST(NodeKind.FUNCTION_DECLARATION, new VariableData(funcVar.getData().getIndex()),
