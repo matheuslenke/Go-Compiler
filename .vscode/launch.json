@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "br.ufes.edu.compiladores.GoCompiler",
             "projectName": "go-compiler",
-            "args": "/Users/matheuslenke/Developer/College/2021-2/Compilers/Go-Compiler/src/test/resources/exampleAlone/bufChan.go"
+            "args": "src/test/resources/exampleAlone/bufChan.go"
         }
     ]
 }
