@@ -75,17 +75,42 @@ public class AST {
 			System.err.printf("(%s) ", this.type.toString());
 		}
 		if (this.kind == NodeKind.VAR_DECL_NODE || this.kind == NodeKind.VAR_USE_NODE) {
-			System.err.printf("%s@", this.kind.name());
+			VariableData varData = (VariableData) this.data;
+			System.err.printf("%s@%d", vt.getName(varData.getIndex()), varData.getIndex());
 		} else {
 			System.err.printf("%s", this.kind.toString());
 		}
 		if (NodeKind.hasData(this.kind)) {
+			switch (this.kind) {
+				case REAL_VAL_NODE:
+					RealData realData = (RealData) this.data;
+					System.err.print("@" + realData.getValue());
+					break;
+
+				case STR_VAL_NODE:
+					StringData strData = (StringData) this.data;
+					System.err.print("@" + strData.getValue());
+					break;
+
+				case INT_VAL_NODE:
+					IntData intData = (IntData) this.data;
+					System.err.print("@" + intData.getValue());
+					break;
+
+				case BOOL_VAL_NODE:
+					BoolData boolData = (BoolData) this.data;
+					System.err.print("@" + boolData.getValue());
+					break;
+
+				default:
+					break;
+			}
 			if (this.kind == NodeKind.REAL_VAL_NODE) {
-				System.err.printf("%d", this.data.getIndex());
+
 			} else if (this.kind == NodeKind.STR_VAL_NODE) {
-				System.err.printf("@%d", this.data.getIndex());
-			} else {
-				System.err.printf("%d", this.data.getIndex());
+
+			} else if (this.kind == NodeKind.INT_VAL_NODE) {
+				// System.err.printf("%d", this.data.getIndex());
 			}
 		}
 		System.err.printf("\"];\n");

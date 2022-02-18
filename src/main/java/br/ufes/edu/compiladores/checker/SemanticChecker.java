@@ -3,8 +3,12 @@ package br.ufes.edu.compiladores.checker;
 import br.ufes.edu.compiladores.GoParser.*;
 import br.ufes.edu.compiladores.GoParserBaseVisitor;
 import br.ufes.edu.compiladores.ast.AST;
+import br.ufes.edu.compiladores.ast.BoolData;
 import br.ufes.edu.compiladores.ast.EmptyData;
+import br.ufes.edu.compiladores.ast.IntData;
 import br.ufes.edu.compiladores.ast.NodeKind;
+import br.ufes.edu.compiladores.ast.RealData;
+import br.ufes.edu.compiladores.ast.StringData;
 import br.ufes.edu.compiladores.ast.VariableData;
 import br.ufes.edu.compiladores.tables.StrTable;
 import br.ufes.edu.compiladores.tables.VarTable;
@@ -68,12 +72,13 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 return new AST(NodeKind.VAR_DECL_NODE, new VariableData(idx), lastDeclType);
             case INT_TYPE:
                 return new AST(NodeKind.VAR_DECL_NODE, new VariableData(idx), lastDeclType);
+            case FUNC_TYPE:
+                return new AST(NodeKind.FUNC_DECL_NODE, new VariableData(idx), lastDeclType);
             case NO_TYPE:
                 return new AST(NodeKind.VAR_DECL_NODE, new EmptyData(), lastDeclType);
             default:
                 throw new Error();
         }
-
     }
 
     // ----------------------------------------------------------------------------
@@ -151,19 +156,6 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     @Override
     public AST visitSourceFile(final SourceFileContext ctx) {
         // Visita recursivamente os filhos para construir a AST.
-
-        // AST packageClause = visit(ctx.packageClause());
-        // AST importDeclClause = AST.newSubtree(NodeKind.IMPORT_LIST_NODE,
-        // Type.NO_TYPE);
-
-        // for (final ImportDeclContext importDeclContext : ctx.importDecl()) {
-        // AST child = visit(importDeclContext);
-        // if( child != null) {
-        // importDeclClause.addChildren(child);
-        // }
-        // }
-        logger.info("Visitando raiz");
-
         this.root = AST.newSubtree(NodeKind.SOURCE_FILE, Type.NO_TYPE);
 
         for (final FunctionDeclContext functionDeclContext : ctx.functionDecl()) {
@@ -189,13 +181,12 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     // functionDecl: FUNC IDENTIFIER (signature block?);
     @Override
     public AST visitFunctionDecl(final FunctionDeclContext ctx) {
-        String funcName = ctx.IDENTIFIER().getText();
-
         AST signature = visit(ctx.signature());
         lastDeclType = Type.FUNC_TYPE;
         AST funcVar = newVar(ctx.IDENTIFIER().getSymbol());
 
-        AST decl = new AST(NodeKind.FUNCTION_DECLARATION, new VariableData(funcVar.getData().getIndex()),
+        VariableData varData = (VariableData) funcVar.getData();
+        AST decl = new AST(NodeKind.FUNC_DECL_NODE, new VariableData(varData.getIndex()),
                 Type.NO_TYPE);
         if (signature != null) {
             decl.addChildren(signature);
@@ -421,31 +412,32 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     @Override
     public AST visitInteger(final IntegerContext ctx) {
-        lastDeclType = Type.INT_TYPE;
-        return null;
+        // lastDeclType = Type.INT_TYPE;
+        return new AST(NodeKind.INT_VAL_NODE, new IntData(Integer.parseInt(ctx.DECIMAL_LIT().getText())),
+                Type.INT_TYPE);
     }
 
     @Override
     public AST visitString_(final String_Context ctx) {
-        lastDeclType = Type.STR_TYPE;
-        return null;
+        // lastDeclType = Type.STR_TYPE;
+        return new AST(NodeKind.STR_VAL_NODE, new StringData(0), Type.STR_TYPE);
     }
 
     @Override
     public AST visitReal(final RealContext ctx) {
-        lastDeclType = Type.FLOAT_TYPE;
-        return null;
+        // lastDeclType = Type.FLOAT_TYPE;
+        return new AST(NodeKind.REAL_VAL_NODE, new RealData(Double.parseDouble(ctx.FLOAT_LIT().getText())),
+                Type.FLOAT_TYPE);
     }
 
     @Override
     public AST visitNilType(final NilTypeContext ctx) {
-        return null;
+        return new AST(NodeKind.NIL_NODE, new EmptyData(), Type.NIL_TYPE);
     }
 
     @Override
-    public AST visitRuneType(final RuneTypeContext ctx) {
-        lastDeclType = Type.RUNE_TYPE;
-        return null;
+    public AST visitBoolean_(Boolean_Context ctx) {
+        return new AST(NodeKind.BOOL_VAL_NODE, new BoolData(Boolean.valueOf(ctx.boolValue.getText())), Type.BOOL_TYPE);
     }
 
     // <----------------------------------------------->
@@ -463,27 +455,71 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         AST variableDeclaration = new AST(NodeKind.VAR_LIST_NODE, new EmptyData(), Type.NO_TYPE);
 
         List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
-        for (TerminalNode identifier : identifierList) {
-            variableDeclaration.addChildren(this.newVar(identifier.getSymbol()));
-        }
 
         if (ctx.expressionList() != null) {
             int quantIdentifier = ctx.identifierList().IDENTIFIER().size();
-
             int quantExpression = ctx.expressionList().expression().size();
-
             checkWrongAssignCount(ctx.start.getLine(), quantIdentifier, quantExpression);
 
             for (int i = 0; i < quantIdentifier; i++) {
+                AST assignNode = new AST(NodeKind.ASSIGN_NODE, new EmptyData(), Type.NO_TYPE);
+
+                AST var = this.newVar(identifierList.get(i).getSymbol());
+                AST value = this.visit(ctx.expressionList().expression(i));
+
+                assignNode.addChildren(var, value);
+                variableDeclaration.addChildren(assignNode);
                 // node.addValue((ValNode) this.visit(ctx.expressionList().expression(i)));
                 // if (declType != lastDeclType) {
                 // typeError(ctx.start.getLine(), "=", declType, lastDeclType);
                 // }
             }
+        } else {
+            for (TerminalNode identifier : identifierList) {
+                variableDeclaration.addChildren(this.newVar(identifier.getSymbol()));
+            }
         }
-
         return variableDeclaration;
     }
+
+    @Override
+    public AST visitAssignment(AssignmentContext ctx) {
+        AST assignmentListNode = new AST(NodeKind.ASSIGN_LIST_NODE, new EmptyData(), Type.NO_TYPE);
+
+        int quantExpressionLeft = ctx.expressionList(0).expression().size();
+        int quantExpressionRight = ctx.expressionList(1).expression().size();
+        checkWrongAssignCount(ctx.start.getLine(), quantExpressionLeft, quantExpressionRight);
+
+        for (int i = 0; i < quantExpressionLeft; i++) {
+            AST assignNode = new AST(NodeKind.ASSIGN_NODE, new EmptyData(), Type.NO_TYPE);
+
+            Token operandName = ctx.expressionList(0).expression(i).getStop();
+            Token value = ctx.expressionList(1).expression(i).getStop();
+
+            AST variable = checkVar(operandName);
+            AST valueAST = new AST(NodeKind.INT_VAL_NODE, new IntData(Integer.valueOf(value.getText())),
+                    Type.INT_TYPE);
+
+            assignNode.addChildren(variable, valueAST);
+            assignmentListNode.addChildren(assignNode);
+        }
+
+        return assignmentListNode;
+    }
+
+    // @Override
+    // public AST visitPrimaryOp(PrimaryOpContext ctx) {
+    // if (ctx.primaryExpr() != null && ctx.primaryExpr().operand().literal() !=
+    // null) {
+    // if (ctx.primaryExpr().operand().literal().basicLit() != null) {
+    // return this.visit(ctx.primaryExpr().operand().literal().basicLit());
+    // } else if (ctx.primaryExpr().operand().operandName() != null) {
+    // return
+    // checkVar(ctx.primaryExpr().operand().operandName().IDENTIFIER(0).getSymbol());
+    // }
+    // }
+    // return visit(ctx.primaryExpr());
+    // }
 
     // @Override
     // public VarDeclNode visitVarDeclImplType(VarDeclImplTypeContext ctx) {

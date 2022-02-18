@@ -111,7 +111,8 @@ sendStmt: channel = expression RECEIVE expression;
 
 incDecStmt: expression (PLUS_PLUS | MINUS_MINUS);
 
-assignment: expressionList assign_op expressionList;
+assignment: expressionList assign_op expressionList
+;
 
 assign_op: (
 		PLUS
@@ -303,6 +304,7 @@ basicLit:
 	| real #realType
 	| IMAGINARY_LIT #imaginaryType
 	| RUNE_LIT #runeType
+	| boolean_ #booleanType
 ;
 
 
@@ -315,6 +317,10 @@ integer:
 	| OCTAL_LIT
 	| HEX_LIT
 	| RUNE_LIT
+;
+
+boolean_:
+	boolValue = ( TRUE_ | FALSE_ )
 ;
 
 operandName: IDENTIFIER (DOT IDENTIFIER)?;

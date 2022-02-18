@@ -1,11 +1,13 @@
 package br.ufes.edu.compiladores;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.gui.TreeViewer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import br.ufes.edu.compiladores.checker.SemanticChecker;
@@ -53,6 +55,10 @@ public class GoCompiler {
     logger.info("PARSE SUCCESSFUL");
     checker.printTables();
     checker.printAST();
+
+    TreeViewer viewr = new TreeViewer(Arrays.asList(
+        parser.getRuleNames()), tree);
+    viewr.open();
 
   }
 }

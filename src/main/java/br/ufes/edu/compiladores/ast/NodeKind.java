@@ -16,6 +16,7 @@ public enum NodeKind {
     REAL_VAL_NODE(""),
     STR_VAL_NODE(""),
     TIMES_NODE("*"),
+    ASSIGN_LIST_NODE("assign_list_node"),
 
     // Import e Package
     SOURCE_FILE("source_file"),
@@ -29,7 +30,7 @@ public enum NodeKind {
     VAR_USE_NODE("var_use"),
     VAR_LIST_NODE("var_list"),
     EXPRESSION_LIST_NODE("expression_list"),
-    FUNCTION_DECLARATION("funct_decl"),
+    FUNC_DECL_NODE("func_decl"),
     DECLARATION("declaration"),
     IDENTIFIER_LIST_NODE("identifier_list"),
     IDENTIFIER("identifier"),
@@ -51,8 +52,7 @@ public enum NodeKind {
     MAP_TYPE("map_type"),
     CHANNEL_TYPE("channel_type"),
     NIL_NODE("nil"),
-    CODE_BLOCK("block")
-    ;
+    CODE_BLOCK("block");
 
     private String token;
 
@@ -66,16 +66,16 @@ public enum NodeKind {
     }
 
     public static boolean hasData(NodeKind kind) {
-		switch(kind) {
-	        case BOOL_VAL_NODE:
-	        case INT_VAL_NODE:
-	        case REAL_VAL_NODE:
-	        case STR_VAL_NODE:
-	        case VAR_DECL_NODE:
-	        case VAR_USE_NODE:
-	            return true;
-	        default:
-	            return false;
-		}
-	}
+        switch (kind) {
+            case BOOL_VAL_NODE:
+            case INT_VAL_NODE:
+            case REAL_VAL_NODE:
+            case STR_VAL_NODE:
+            case VAR_DECL_NODE:
+            case VAR_USE_NODE:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

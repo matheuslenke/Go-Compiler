@@ -22,11 +22,6 @@ public enum Type {
 			return "string";
 		}
 	},
-	RUNE_TYPE {
-		public String toString() {
-			return "rune";
-		}
-	},
 	NIL_TYPE {
 		public String toString() {
 			return "nil";
@@ -46,10 +41,10 @@ public enum Type {
 	// Tabela de unificação de tipos primitivos para o
 	// operador '+'.
 	private static Type plus[][] = {
-			{ INT_TYPE, FLOAT_TYPE, INT_TYPE, STR_TYPE },
-			{ FLOAT_TYPE, FLOAT_TYPE, FLOAT_TYPE, STR_TYPE },
-			{ INT_TYPE, FLOAT_TYPE, BOOL_TYPE, STR_TYPE },
-			{ STR_TYPE, STR_TYPE, STR_TYPE, STR_TYPE }
+			{ INT_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+			{ NO_TYPE, FLOAT_TYPE, NO_TYPE, NO_TYPE },
+			{ NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+			{ NO_TYPE, NO_TYPE, NO_TYPE, STR_TYPE }
 	};
 
 	public Type unifyPlus(Type that) {
@@ -59,8 +54,8 @@ public enum Type {
 	// Tabela de unificação de tipos primitivos para os
 	// demais operadores aritméticos.
 	private static Type other[][] = {
-			{ INT_TYPE, FLOAT_TYPE, NO_TYPE, NO_TYPE },
-			{ FLOAT_TYPE, FLOAT_TYPE, NO_TYPE, NO_TYPE },
+			{ INT_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+			{ NO_TYPE, FLOAT_TYPE, NO_TYPE, NO_TYPE },
 			{ NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
 			{ NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE }
 	};
@@ -72,14 +67,40 @@ public enum Type {
 	// Tabela de unificação de tipos primitivos para os
 	// operadores de comparação.
 	private static Type comp[][] = {
-			{ BOOL_TYPE, BOOL_TYPE, NO_TYPE, NO_TYPE },
-			{ BOOL_TYPE, BOOL_TYPE, NO_TYPE, NO_TYPE },
+			{ BOOL_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+			{ NO_TYPE, BOOL_TYPE, NO_TYPE, NO_TYPE },
 			{ NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
 			{ NO_TYPE, NO_TYPE, NO_TYPE, BOOL_TYPE }
 	};
 
 	public Type unifyComp(Type that) {
 		return comp[this.ordinal()][that.ordinal()];
+	}
+
+	// Tabela de unificação de tipos primitivos para os
+	// operadores de comparação de igualdade.
+	private static Type eq[][] = {
+			{ BOOL_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+			{ NO_TYPE, BOOL_TYPE, NO_TYPE, NO_TYPE },
+			{ NO_TYPE, NO_TYPE, BOOL_TYPE, NO_TYPE },
+			{ NO_TYPE, NO_TYPE, NO_TYPE, BOOL_TYPE }
+	};
+
+	public Type unifyEq(Type that) {
+		return eq[this.ordinal()][that.ordinal()];
+	}
+
+	// Tabela de unificação de tipos primitivos para os
+	// operadores de atribuição.
+	private static Type attr[][] = {
+			{ INT_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+			{ FLOAT_TYPE, FLOAT_TYPE, NO_TYPE, NO_TYPE },
+			{ NO_TYPE, NO_TYPE, BOOL_TYPE, NO_TYPE },
+			{ NO_TYPE, NO_TYPE, NO_TYPE, STR_TYPE }
+	};
+
+	public Type unifyAttr(Type that) {
+		return attr[this.ordinal()][that.ordinal()];
 	}
 
 }

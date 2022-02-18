@@ -1,14 +1,14 @@
 package samples
 
-import ("fmt"
-	"reflect"
-)
-
 func ParamTest(a, b int) {
-	var a int   // +
-	var b, c float64 // + strange extra levels
+	var d int        // +
+	var n, c float64 // + strange extra levels
 	// var d = 1        // + doesn't show zero value
-	var e, f float32 = -1, -2  // +
+	var e, f float32 = -1, -2.5 // +
+	var numero int = 300
+	var pedroPassou bool = true
+
+	numero = 20
 	// var (
 	// 	g       int
 	// 	h, i, j = 2.0, 3.0, "bar"
