@@ -53,9 +53,9 @@ public class GoCompiler {
     checker.printTables();
     checker.printAST();
 
-    TreeViewer viewr = new TreeViewer(Arrays.asList(
-        parser.getRuleNames()), tree);
-    viewr.open();
+    // TreeViewer viewr = new TreeViewer(Arrays.asList(
+    // parser.getRuleNames()), tree);
+    // viewr.open();
 
   }
 }

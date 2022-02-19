@@ -8,9 +8,11 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import br.ufes.edu.compiladores.GoParser.AddOpContext;
 import br.ufes.edu.compiladores.GoParser.ArrayTypeContext;
 import br.ufes.edu.compiladores.GoParser.AssignmentContext;
+import br.ufes.edu.compiladores.GoParser.BlockContext;
 import br.ufes.edu.compiladores.GoParser.Boolean_Context;
 import br.ufes.edu.compiladores.GoParser.DeclarationContext;
 import br.ufes.edu.compiladores.GoParser.ExpressionContext;
+import br.ufes.edu.compiladores.GoParser.ForStmtContext;
 import br.ufes.edu.compiladores.GoParser.FunctionDeclContext;
 import br.ufes.edu.compiladores.GoParser.IfStmtContext;
 import br.ufes.edu.compiladores.GoParser.ImportDeclContext;
@@ -19,8 +21,12 @@ import br.ufes.edu.compiladores.GoParser.IntegerContext;
 import br.ufes.edu.compiladores.GoParser.MulOpContext;
 import br.ufes.edu.compiladores.GoParser.NilTypeContext;
 import br.ufes.edu.compiladores.GoParser.OperandNameContext;
+import br.ufes.edu.compiladores.GoParser.ParameterDeclContext;
+import br.ufes.edu.compiladores.GoParser.ParametersContext;
 import br.ufes.edu.compiladores.GoParser.RealContext;
 import br.ufes.edu.compiladores.GoParser.RelOpContext;
+import br.ufes.edu.compiladores.GoParser.ResultContext;
+import br.ufes.edu.compiladores.GoParser.SignatureContext;
 import br.ufes.edu.compiladores.GoParser.SourceFileContext;
 import br.ufes.edu.compiladores.GoParser.StatementContext;
 import br.ufes.edu.compiladores.GoParser.String_Context;
@@ -189,7 +195,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         return this.root;
     }
 
-    // functionDecl: FUNC IDENTIFIER (signature block?)
+    // <---------------- Visitadores dos FUNÇÕES ---------------->
     @Override
     public AST visitFunctionDecl(final FunctionDeclContext ctx) {
         AST signature = visit(ctx.signature());
@@ -197,23 +203,83 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         AST funcVar = newVar(ctx.IDENTIFIER().getSymbol());
 
         VariableData varData = (VariableData) funcVar.getData();
+
         AST decl = new AST(NodeKind.FUNC_DECL_NODE, new VariableData(varData.getIndex()),
-                Type.NO_TYPE);
-        if (signature != null) {
-            decl.addChildren(signature);
+                lastDeclType);
+
+        decl.addChildren(signature);
+
+        AST block = this.visit(ctx.block());
+        decl.addChildren(block);
+
+        return decl;
+    }
+
+    @Override
+    public AST visitSignature(final SignatureContext ctx) {
+        AST parameters = this.visit(ctx.parameters());
+        AST result = null;
+        if (ctx.result() != null) {
+            result = visit(ctx.result());
         }
 
-        AST block = new AST(NodeKind.CODE_BLOCK, null, Type.NO_TYPE);
+        AST p = new AST(NodeKind.SIGNATURE_NODE, new EmptyData(), Type.NO_TYPE);
 
-        for (StatementContext statement : ctx.block().statementList().statement()) {
-            AST child = visit(statement);
+        if (parameters != null) {
+            p.addChildren(parameters);
+        }
+        if (result != null) {
+            p.addChildren(result);
+        }
+        return p;
+    }
+
+    @Override
+    public AST visitParameters(final ParametersContext ctx) {
+        AST parameters = new AST(NodeKind.PARAMETERS_NODE, new EmptyData(),
+                Type.NO_TYPE);
+        for (final ParameterDeclContext paramterDeclCtx : ctx.parameterDecl()) {
+            AST child = visit(paramterDeclCtx);
             if (child != null) {
-                block.addChildren(child);
+                AST[] array = new AST[child.getChildren().size()];
+                parameters.addChildren(child.getChildren().toArray(array));
             }
         }
-        decl.addChildren(block);
-        // Falta adicionar bloco de código
-        return decl;
+        return parameters;
+    }
+
+    @Override
+    public AST visitParameterDecl(final ParameterDeclContext ctx) {
+        AST parameterDecl = new AST(NodeKind.PARAMETER_DECLARATION, new EmptyData(), Type.NO_TYPE);
+        AST type = visit(ctx.type_());
+        lastDeclType = type.getType();
+        if (ctx.identifierList() != null) {
+            List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
+
+            int quantIdentifier = ctx.identifierList().IDENTIFIER().size();
+            for (int i = 0; i < quantIdentifier; i++) {
+
+                Token identifierSymbol = identifierList.get(i).getSymbol();
+                AST newVar = this.newVar(identifierSymbol);
+
+                parameterDecl.addChildren(newVar);
+            }
+        } else if (type != null) {
+            parameterDecl.addChildren(new AST(NodeKind.TYPE_USE, new EmptyData(), lastDeclType));
+        }
+        return parameterDecl;
+    }
+
+    @Override
+    public AST visitResult(final ResultContext ctx) {
+        AST parameters = this.visit(ctx.parameters());
+        if (parameters != null) {
+            AST result = new AST(NodeKind.RESULT_NODE, new EmptyData(), Type.NO_TYPE);
+            AST[] children = new AST[result.getChildren().size()];
+            result.addChildren(parameters.getChildren().toArray(children));
+            return result;
+        }
+        return visit(ctx.type_());
     }
 
     // type_: typeName | typeLit | L_PAREN type_ R_PAREN
@@ -447,6 +513,19 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     }
 
     @Override
+    public AST visitBlock(BlockContext ctx) {
+        AST blockNode = AST.newSubtree(NodeKind.CODE_BLOCK, Type.NO_TYPE);
+
+        for (StatementContext statement : ctx.statementList().statement()) {
+            AST child = visit(statement);
+            if (child != null) {
+                blockNode.addChildren(child);
+            }
+        }
+        return blockNode;
+    }
+
+    @Override
     public AST visitIfStmt(IfStmtContext ctx) {
 
         AST exprNode = this.visit(ctx.expression());
@@ -454,25 +533,34 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         checkBoolExpr(ctx.IF().getSymbol().getLine(), NodeKind.IF_NODE.toString(), exprNode.getType());
         AST ifNode = AST.newSubtree(NodeKind.IF_NODE, Type.NO_TYPE, exprNode);
 
-        AST thenNode = AST.newSubtree(NodeKind.CODE_BLOCK, Type.NO_TYPE);
+        AST thenNode = this.visit(ctx.block(0));
 
-        for (int i = 0; i < ctx.block(0).statementList().statement().size(); i++) {
-            AST child = this.visit(ctx.block(0).statementList().statement(i));
-            thenNode.addChildren(child);
-        }
+        ifNode.addChildren(thenNode);
 
         if (ctx.ELSE() != null) {
 
-            AST elseThenNode = AST.newSubtree(NodeKind.CODE_BLOCK, Type.NO_TYPE);
-
-            for (int i = 0; i < ctx.block(1).statementList().statement().size(); i++) {
-                AST child = this.visit(ctx.block(1).statementList().statement(i));
-                elseThenNode.addChildren(child);
-            }
+            AST elseThenNode = this.visit(ctx.block(0));
 
             ifNode.addChildren(elseThenNode);
 
         }
         return ifNode;
+    }
+
+    @Override
+    public AST visitForStmt(ForStmtContext ctx) {
+        if (ctx.expression() == null) {
+            String.format("SEMANTIC ERROR (%d): expression invalid",
+                    ctx.FOR().getSymbol().getLine());
+            System.exit(1);
+        }
+
+        AST exprNode = this.visit(ctx.expression());
+
+        AST forNode = AST.newSubtree(NodeKind.FOR_NODE, Type.NO_TYPE, exprNode);
+
+        forNode.addChildren(this.visit(ctx.block()));
+
+        return forNode;
     }
 }

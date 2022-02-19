@@ -53,16 +53,13 @@ Análise léxica e sintática feita utilizando de gramáticas disponíveis pela 
 
 - Execução de blocos sequenciais de código.
 
-- Pelo menos uma estrutura de escolha (if-then-else) e uma de repetição (while,
-for, etc).
+- Pelo menos uma estrutura de escolha (if-then-else) e uma de repetição (while, for, etc): A estrutura de repetição é apenas o while comum, que no Go é usado com a palavra for também
 
 - Declaração de variáveis apenas de forma explícita no formato: ```var identiferList type = expressionList```
 
-- Tipos básicos como int, real, string e bool (quando
-aplicável à LP): Diferentes tipos de int (uint8, uint16, uint32, etc...) e float (float32 e float64) reduzidos apenas para o tipo int e float. 
+- Tipos básicos como int, real, string e bool (quando aplicável à LP): Diferentes tipos de int (uint8, uint16, uint32, etc...) e float (float32 e float64) reduzidos apenas para o tipo int e float. 
 
-- Pelo menos um tipo composto (vetores, listas em
-Python, etc): Utilizado apenas arrays
+- Pelo menos um tipo composto (vetores, listas em Python, etc): Utilizado apenas arrays
 
 - Declaração e execução correta de chamadas de função com número de parâmetros fixos (não precisa ser varargs).
 

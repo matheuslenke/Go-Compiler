@@ -7,17 +7,17 @@ public enum NodeKind {
     SHORT_VAR_DECL_NODE(":="),
     ASSIGN_NODE("="),
     EQ_NODE("=="),
-    BOOL_VAL_NODE(""),
+    BOOL_VAL_NODE("bool"),
     IF_NODE("if"),
-    WHILE_NODE("while"),
-    INT_VAL_NODE(""),
+    FOR_NODE("for"),
+    INT_VAL_NODE("int"),
     LT_NODE("<"),
     GT_NODE(">"),
     MINUS_NODE("-"),
     OVER_NODE("/"),
     PLUS_NODE("+"),
-    REAL_VAL_NODE(""),
-    STR_VAL_NODE(""),
+    REAL_VAL_NODE("real"),
+    STR_VAL_NODE("string"),
     TIMES_NODE("*"),
     ASSIGN_LIST_NODE("assign_list_node"),
 
@@ -43,6 +43,7 @@ public enum NodeKind {
     // Signature
     SIGNATURE_NODE("signature"),
     PARAMETERS_NODE("parameters"),
+    RESULT_NODE("result"),
     PARAMETER_DECLARATION("parameter_declaration"),
 
     // Declarações de Tipo
