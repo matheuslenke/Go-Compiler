@@ -35,6 +35,9 @@ public class TypeUtil {
             case "int64":
                 identifier = "int";
                 break;
+            default:
+                identifier = "no_type";
+                break;
         }
         return TypeUtil.types.get(identifier);
     }

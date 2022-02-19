@@ -39,28 +39,6 @@
             <artifactId>antlr4</artifactId>
             <version>4.7.2</version>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.17.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.17.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -100,17 +78,17 @@
                 <version>${antlr4test-maven-plugin.version}</version>
                 <configuration>
                     <scenarios>
-                        <!-- <scenario>
+                        <scenario>
                             <scenarioName>TestAllFiles</scenarioName>
                             <verbose>true</verbose>
                             <showTree>false</showTree>
-                            <enabled>true</enabled>
+                            <enabled>false</enabled>
                             <entryPoint>sourceFile</entryPoint>
                             <grammarName>Go</grammarName>
                             <packageName>br.ufes.edu.compiladores</packageName>
                             <testFileExtension>.go</testFileExtension>
                             <exampleFiles>src/test/resources/examples</exampleFiles>
-                        </scenario> -->
+                        </scenario> 
                         <scenario>
                             <scenarioName>TestOneFile</scenarioName>
                             <verbose>true</verbose>

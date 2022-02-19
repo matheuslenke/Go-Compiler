@@ -8,8 +8,6 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.gui.TreeViewer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import br.ufes.edu.compiladores.checker.SemanticChecker;
 
 /*
@@ -22,7 +20,6 @@ import br.ufes.edu.compiladores.checker.SemanticChecker;
 */
 
 public class GoCompiler {
-  private static Logger logger = LogManager.getLogger(GoCompiler.class);
 
   public static void main(String[] args) throws IOException {
 
@@ -52,7 +49,7 @@ public class GoCompiler {
     SemanticChecker checker = new SemanticChecker();
     checker.visit(tree);
 
-    logger.info("PARSE SUCCESSFUL");
+    System.out.println("PARSE SUCCESSFUL");
     checker.printTables();
     checker.printAST();
 
