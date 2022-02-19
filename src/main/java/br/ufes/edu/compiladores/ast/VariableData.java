@@ -14,4 +14,5 @@ public class VariableData implements Data {
     public void setIndex(Integer index) {
         this.index = index;
     }
+
 }

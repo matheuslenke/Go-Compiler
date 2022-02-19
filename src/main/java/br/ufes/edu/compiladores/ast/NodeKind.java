@@ -12,6 +12,7 @@ public enum NodeKind {
     WHILE_NODE("while"),
     INT_VAL_NODE(""),
     LT_NODE("<"),
+    GT_NODE(">"),
     MINUS_NODE("-"),
     OVER_NODE("/"),
     PLUS_NODE("+"),

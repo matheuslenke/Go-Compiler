@@ -1,10 +1,11 @@
 package br.ufes.edu.compiladores.ast;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
+import br.ufes.edu.compiladores.tables.StrTable;
 import br.ufes.edu.compiladores.tables.VarTable;
 import br.ufes.edu.compiladores.typing.Type;
 
@@ -62,6 +63,7 @@ public class AST {
 	// Estáticas porque só precisamos de uma instância.
 	private static int nr;
 	private static VarTable vt;
+	private static StrTable st;
 
 	// Imprime recursivamente a codificação em DOT da subárvore começando no nó
 	// atual.
@@ -74,7 +76,8 @@ public class AST {
 		if (this.type != Type.NO_TYPE) {
 			System.err.printf("(%s) ", this.type.toString());
 		}
-		if (this.kind == NodeKind.VAR_DECL_NODE || this.kind == NodeKind.VAR_USE_NODE) {
+		if (this.kind == NodeKind.FUNC_DECL_NODE || this.kind == NodeKind.VAR_DECL_NODE
+				|| this.kind == NodeKind.VAR_USE_NODE) {
 			VariableData varData = (VariableData) this.data;
 			System.err.printf("%s@%d", vt.getName(varData.getIndex()), varData.getIndex());
 		} else {
@@ -89,7 +92,7 @@ public class AST {
 
 				case STR_VAL_NODE:
 					StringData strData = (StringData) this.data;
-					System.err.print("@" + strData.getValue());
+					System.err.print("@" + st.get(strData.getValue()));
 					break;
 
 				case INT_VAL_NODE:
@@ -105,13 +108,6 @@ public class AST {
 				default:
 					break;
 			}
-			if (this.kind == NodeKind.REAL_VAL_NODE) {
-
-			} else if (this.kind == NodeKind.STR_VAL_NODE) {
-
-			} else if (this.kind == NodeKind.INT_VAL_NODE) {
-				// System.err.printf("%d", this.data.getIndex());
-			}
 		}
 		System.err.printf("\"];\n");
 
@@ -123,9 +119,10 @@ public class AST {
 	}
 
 	// Imprime a árvore toda em stderr.
-	public static void printDot(AST tree, VarTable table) {
+	public static void printDot(AST tree, VarTable table, StrTable stringTable) {
 		nr = 0;
 		vt = table;
+		st = stringTable;
 		System.err.printf("digraph {\ngraph [ordering=\"out\"];\n");
 		tree.printNodeDot();
 		System.err.printf("}\n");

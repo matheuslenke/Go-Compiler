@@ -14,4 +14,5 @@ public class BoolData implements Data {
     public void setValue(Boolean data) {
         this.data = data;
     }
+
 }

@@ -119,7 +119,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     // Exibe a AST no formato DOT em stderr.
     public void printAST() {
-        AST.printDot(root, vt);
+        AST.printDot(root, vt, st);
     }
 
     // Checkers
@@ -248,7 +248,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     @Override
     public AST visitString_(final String_Context ctx) {
-        return new AST(NodeKind.STR_VAL_NODE, new StringData(0), Type.STR_TYPE);
+        Integer strIndex = this.st.add(ctx.INTERPRETED_STRING_LIT().getText().replace("\"", ""));
+        return new AST(NodeKind.STR_VAL_NODE, new StringData(strIndex), Type.STR_TYPE);
     }
 
     @Override
@@ -267,7 +268,10 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         return new AST(NodeKind.BOOL_VAL_NODE, new BoolData(Boolean.valueOf(ctx.boolValue.getText())), Type.BOOL_TYPE);
     }
 
-    // <----------------------------------------------->
+    /*
+     * <----------------- Operadores do Declaração de variáveis e assignment
+     * ----------------->
+     */
 
     @Override
     public AST visitVarDeclExplType(VarDeclExplTypeContext ctx) {
@@ -304,7 +308,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     }
 
     /**
-     * Somente verifica atribuições expression = expression
+     * Somente verifica atribuições identifier = expression
      */
     @Override
     public AST visitAssignment(AssignmentContext ctx) {
@@ -323,6 +327,12 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             ExpressionContext value = ctx.expressionList(1).expression(i);
             AST valueAST = this.visit(value);
 
+            if (valueAST == null) {
+                String.format("SEMANTIC ERROR (%d): expression invalid",
+                        variable.getLine());
+                System.exit(1);
+            }
+
             checkTypeError(variable.getLine(), "=", variableAST.getType(), valueAST.getType());
 
             assignNode.addChildren(variableAST, valueAST);
@@ -331,6 +341,10 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
         return assignmentListNode;
     }
+
+    /*
+     * <----------------- Operadores do Expression ----------------->
+     */
 
     @Override
     public AST visitAddOp(AddOpContext ctx) {
@@ -379,8 +393,11 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     @Override
     public AST visitImportSpec(ImportSpecContext ctx) {
-        Token token = ctx.IDENTIFIER().getSymbol();
-        String text = token.getText();
+        Token token = ctx.alias;
+        if (token == null) {
+            token = ctx.importPath().string_().INTERPRETED_STRING_LIT().getSymbol();
+        }
+        String text = token.getText().replace("\"", "");
         int currentLine = token.getLine();
         Integer index = vt.lookupVar(text);
         if (index != -1) {

@@ -14,4 +14,5 @@ public class StringData implements Data {
     public void setValue(Integer index) {
         this.index = index;
     }
+
 }

@@ -14,4 +14,5 @@ public class RealData implements Data {
     public void setValue(Double data) {
         this.data = data;
     }
+
 }

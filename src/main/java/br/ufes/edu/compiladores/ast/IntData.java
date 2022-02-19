@@ -14,4 +14,5 @@ public class IntData implements Data {
     public void setValue(Integer data) {
         this.data = data;
     }
+
 }
