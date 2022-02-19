@@ -9,6 +9,6 @@ func func1() {
 
 func func2(){
 	func1()
-	var s string = "func2"
-	fmt.Println(s)
+	var s2 string = "func1"
+	fmt.Println(s2)
 }
