@@ -56,7 +56,10 @@ public enum NodeKind {
     MAP_TYPE("map_type"),
     CHANNEL_TYPE("channel_type"),
     NIL_NODE("nil"),
-    CODE_BLOCK("block");
+    CODE_BLOCK("block"),
+
+    // Conversões de tipo
+    I2F_NODE("I2F");
 
     private String token;
 

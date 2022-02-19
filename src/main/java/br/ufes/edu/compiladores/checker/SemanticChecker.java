@@ -6,11 +6,13 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import br.ufes.edu.compiladores.GoParser.AddOpContext;
+import br.ufes.edu.compiladores.GoParser.ArrayTypeContext;
 import br.ufes.edu.compiladores.GoParser.AssignmentContext;
 import br.ufes.edu.compiladores.GoParser.Boolean_Context;
 import br.ufes.edu.compiladores.GoParser.DeclarationContext;
 import br.ufes.edu.compiladores.GoParser.ExpressionContext;
 import br.ufes.edu.compiladores.GoParser.FunctionDeclContext;
+import br.ufes.edu.compiladores.GoParser.IfStmtContext;
 import br.ufes.edu.compiladores.GoParser.ImportDeclContext;
 import br.ufes.edu.compiladores.GoParser.ImportSpecContext;
 import br.ufes.edu.compiladores.GoParser.IntegerContext;
@@ -104,6 +106,14 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             System.out.println(String.format(
                     "SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%s' and RHS is '%s'.\n",
                     lineNo, op, t1, t2));
+            System.exit(1);
+        }
+    }
+
+    private void checkBoolExpr(int lineNo, String cmd, Type t) {
+        if (t != Type.BOOL_TYPE) {
+            System.out.printf("SEMANTIC ERROR (%d): conditional expression in '%s' is '%s' instead of '%s'.\n",
+                    lineNo, cmd, t.toString(), Type.BOOL_TYPE.toString());
             System.exit(1);
         }
     }
@@ -294,7 +304,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
                 AST value = this.visit(ctx.expressionList().expression(i));
 
-                checkTypeError(identifierSymbol.getLine(), "=", newVar.getType(), value.getType());
+                checkTypeError(identifierSymbol.getLine(), NodeKind.EQ_NODE.toString(), newVar.getType(),
+                        value.getType());
 
                 assignNode.addChildren(newVar, value);
                 variableDeclaration.addChildren(assignNode);
@@ -333,7 +344,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 System.exit(1);
             }
 
-            checkTypeError(variable.getLine(), "=", variableAST.getType(), valueAST.getType());
+            checkTypeError(variable.getLine(), NodeKind.EQ_NODE.toString(), variableAST.getType(), valueAST.getType());
 
             assignNode.addChildren(variableAST, valueAST);
             assignmentListNode.addChildren(assignNode);
@@ -408,5 +419,60 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
         Integer idx = vt.addVar(text, currentLine, Type.NO_TYPE);
         return new AST(NodeKind.IMPORT_SPEC, new VariableData(idx), Type.NO_TYPE);
+    }
+
+    /*
+     * <----------------- Declaração de Tipos compostos ----------------->
+     */
+
+    @Override
+    public AST visitArrayType(ArrayTypeContext ctx) {
+        AST arrayLength = this.visit(ctx.arrayLength().expression());
+        if (arrayLength == null) {
+            String.format("SEMANTIC ERROR (%d): expression invalid",
+                    ctx.L_BRACKET().getSymbol().getLine());
+            System.exit(1);
+        }
+
+        AST type = this.visit(ctx.elementType());
+        if (type == null) {
+            String.format("SEMANTIC ERROR (%d): expression invalid",
+                    ctx.L_BRACKET().getSymbol().getLine());
+            System.exit(1);
+        }
+
+        AST arrayDecl = new AST(NodeKind.ARRAY_TYPE, new EmptyData(), Type.ARRAY_TYPE);
+        arrayDecl.addChildren(arrayLength, type);
+        return arrayDecl;
+    }
+
+    @Override
+    public AST visitIfStmt(IfStmtContext ctx) {
+
+        AST exprNode = this.visit(ctx.expression());
+
+        checkBoolExpr(ctx.IF().getSymbol().getLine(), NodeKind.IF_NODE.toString(), exprNode.getType());
+        AST ifNode = AST.newSubtree(NodeKind.IF_NODE, Type.NO_TYPE, exprNode);
+
+        AST thenNode = AST.newSubtree(NodeKind.CODE_BLOCK, Type.NO_TYPE);
+
+        for (int i = 0; i < ctx.block(0).statementList().statement().size(); i++) {
+            AST child = this.visit(ctx.block(0).statementList().statement(i));
+            thenNode.addChildren(child);
+        }
+
+        if (ctx.ELSE() != null) {
+
+            AST elseThenNode = AST.newSubtree(NodeKind.CODE_BLOCK, Type.NO_TYPE);
+
+            for (int i = 0; i < ctx.block(1).statementList().statement().size(); i++) {
+                AST child = this.visit(ctx.block(1).statementList().statement(i));
+                elseThenNode.addChildren(child);
+            }
+
+            ifNode.addChildren(elseThenNode);
+
+        }
+        return ifNode;
     }
 }

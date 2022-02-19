@@ -1,5 +1,8 @@
 package br.ufes.edu.compiladores.typing;
 
+import static br.ufes.edu.compiladores.typing.Conv.I2F;
+import static br.ufes.edu.compiladores.typing.Conv.NONE;
+
 // Enumeração dos tipos nativos que podem existir em GO.
 public enum Type {
     INT_TYPE("int"),
@@ -25,10 +28,14 @@ public enum Type {
     // Tabela de unificação de tipos primitivos para o
     // operador '+'.
     private static Type[][] plus = {
-            { INT_TYPE, NO_TYPE,    NO_TYPE, NO_TYPE },
-            { NO_TYPE,  FLOAT_TYPE, NO_TYPE, NO_TYPE },
-            { NO_TYPE,  NO_TYPE,    NO_TYPE, NO_TYPE },
-            { NO_TYPE,  NO_TYPE,    NO_TYPE, STR_TYPE }
+            { new Unif(INT_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE),
+                    new Unif(NO_TYPE, NONE, NONE) },
+            { new Unif(NO_TYPE, NONE, NONE), new Unif(FLOAT_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE),
+                    new Unif(NO_TYPE, NONE, NONE) },
+            { new Unif(NO_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE),
+                    new Unif(NO_TYPE, NONE, NONE) },
+            { new Unif(NO_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE),
+                    new Unif(STR_TYPE, NONE, NONE) }
     };
 
     public Type unifyPlus(Type that) {
@@ -38,10 +45,10 @@ public enum Type {
     // Tabela de unificação de tipos primitivos para os
     // demais operadores aritméticos.
     private static Type[][] other = {
-            { INT_TYPE, NO_TYPE,    NO_TYPE, NO_TYPE },
-            { NO_TYPE,  FLOAT_TYPE, NO_TYPE, NO_TYPE },
-            { NO_TYPE,  NO_TYPE,    NO_TYPE, NO_TYPE },
-            { NO_TYPE,  NO_TYPE,    NO_TYPE, NO_TYPE }
+            { INT_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+            { NO_TYPE, FLOAT_TYPE, NO_TYPE, NO_TYPE },
+            { NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+            { NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE }
     };
 
     public Type unifyOtherArith(Type that) {
@@ -51,10 +58,10 @@ public enum Type {
     // Tabela de unificação de tipos primitivos para os
     // operadores de comparação.
     private static Type[][] comp = {
-            { BOOL_TYPE, NO_TYPE,   NO_TYPE, NO_TYPE },
-            { NO_TYPE,   BOOL_TYPE, NO_TYPE, NO_TYPE },
-            { NO_TYPE,   NO_TYPE,   NO_TYPE, NO_TYPE },
-            { NO_TYPE,   NO_TYPE,   NO_TYPE, BOOL_TYPE }
+            { BOOL_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+            { NO_TYPE, BOOL_TYPE, NO_TYPE, NO_TYPE },
+            { NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+            { NO_TYPE, NO_TYPE, NO_TYPE, BOOL_TYPE }
     };
 
     public Type unifyComp(Type that) {
@@ -64,10 +71,10 @@ public enum Type {
     // Tabela de unificação de tipos primitivos para os
     // operadores de comparação de igualdade.
     private static Type[][] eq = {
-            { BOOL_TYPE, NO_TYPE,   NO_TYPE,   NO_TYPE },
-            { NO_TYPE,   BOOL_TYPE, NO_TYPE,   NO_TYPE },
-            { NO_TYPE,   NO_TYPE,   BOOL_TYPE, NO_TYPE },
-            { NO_TYPE,   NO_TYPE,   NO_TYPE,   BOOL_TYPE }
+            { BOOL_TYPE, NO_TYPE, NO_TYPE, NO_TYPE },
+            { NO_TYPE, BOOL_TYPE, NO_TYPE, NO_TYPE },
+            { NO_TYPE, NO_TYPE, BOOL_TYPE, NO_TYPE },
+            { NO_TYPE, NO_TYPE, NO_TYPE, BOOL_TYPE }
     };
 
     public Type unifyEq(Type that) {
@@ -77,10 +84,14 @@ public enum Type {
     // Tabela de unificação de tipos primitivos para os
     // operadores de atribuição.
     private static Type[][] attr = {
-            { INT_TYPE,    NO_TYPE,    NO_TYPE,   NO_TYPE },
-            { FLOAT_TYPE,  FLOAT_TYPE, NO_TYPE,   NO_TYPE },
-            { NO_TYPE,     NO_TYPE,    BOOL_TYPE, NO_TYPE },
-            { NO_TYPE,     NO_TYPE,    NO_TYPE,   STR_TYPE }
+            { new Unif(INT_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE),
+                    new Unif(NO_TYPE, NONE, NONE) },
+            { new Unif(FLOAT_TYPE, NONE, NONE), new Unif(FLOAT_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE),
+                    new Unif(NO_TYPE, NONE, NONE) },
+            { new Unif(NO_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE), new Unif(BOOL_TYPE, NONE, NONE),
+                    new Unif(NO_TYPE, NONE, NONE) },
+            { new Unif(NO_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE), new Unif(NO_TYPE, NONE, NONE),
+                    new Unif(STR_TYPE, NONE, NONE) }
     };
 
     public Type unifyAttr(Type that) {
