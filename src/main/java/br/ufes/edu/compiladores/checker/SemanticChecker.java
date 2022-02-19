@@ -5,13 +5,20 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import br.ufes.edu.compiladores.GoParser.AddOpContext;
 import br.ufes.edu.compiladores.GoParser.AssignmentContext;
 import br.ufes.edu.compiladores.GoParser.Boolean_Context;
 import br.ufes.edu.compiladores.GoParser.DeclarationContext;
+import br.ufes.edu.compiladores.GoParser.ExpressionContext;
 import br.ufes.edu.compiladores.GoParser.FunctionDeclContext;
+import br.ufes.edu.compiladores.GoParser.ImportDeclContext;
+import br.ufes.edu.compiladores.GoParser.ImportSpecContext;
 import br.ufes.edu.compiladores.GoParser.IntegerContext;
+import br.ufes.edu.compiladores.GoParser.MulOpContext;
 import br.ufes.edu.compiladores.GoParser.NilTypeContext;
+import br.ufes.edu.compiladores.GoParser.OperandNameContext;
 import br.ufes.edu.compiladores.GoParser.RealContext;
+import br.ufes.edu.compiladores.GoParser.RelOpContext;
 import br.ufes.edu.compiladores.GoParser.SourceFileContext;
 import br.ufes.edu.compiladores.GoParser.StatementContext;
 import br.ufes.edu.compiladores.GoParser.String_Context;
@@ -92,13 +99,14 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     // ----------------------------------------------------------------------------
     // Type checking and inference.
 
-    private void typeError(final int lineNo, final String op, final Type t1, final Type t2) {
-        System.out.println(String.format(
-                "SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%s' and RHS is '%s'.\n",
-                lineNo, op, t1, t2));
-        System.exit(1);
+    private void checkTypeError(final int lineNo, final String op, final Type t1, final Type t2) {
+        if (t1 != t2) {
+            System.out.println(String.format(
+                    "SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%s' and RHS is '%s'.\n",
+                    lineNo, op, t1, t2));
+            System.exit(1);
+        }
     }
-
 
     // Exibe o conteúdo das tabelas em stdout.
     public void printTables() {
@@ -147,6 +155,13 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     public AST visitSourceFile(final SourceFileContext ctx) {
         // Visita recursivamente os filhos para construir a AST.
         this.root = AST.newSubtree(NodeKind.SOURCE_FILE, Type.NO_TYPE);
+
+        for (ImportDeclContext importDeclContext : ctx.importDecl()) {
+            AST importDecl = this.visit(importDeclContext);
+            if (importDecl != null) {
+                this.root.addChildren(importDecl);
+            }
+        }
 
         for (final FunctionDeclContext functionDeclContext : ctx.functionDecl()) {
             AST functionDecl = visit(functionDeclContext);
@@ -270,8 +285,12 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             for (int i = 0; i < quantIdentifier; i++) {
                 AST assignNode = new AST(NodeKind.ASSIGN_NODE, new EmptyData(), Type.NO_TYPE);
 
-                AST newVar = this.newVar(identifierList.get(i).getSymbol());
+                Token identifierSymbol = identifierList.get(i).getSymbol();
+                AST newVar = this.newVar(identifierSymbol);
+
                 AST value = this.visit(ctx.expressionList().expression(i));
+
+                checkTypeError(identifierSymbol.getLine(), "=", newVar.getType(), value.getType());
 
                 assignNode.addChildren(newVar, value);
                 variableDeclaration.addChildren(assignNode);
@@ -298,18 +317,79 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         for (int i = 0; i < quantExpressionLeft; i++) {
             AST assignNode = new AST(NodeKind.ASSIGN_NODE, new EmptyData(), Type.NO_TYPE);
 
-            Token operandName = ctx.expressionList(0).expression(i).getStop();
-            Token value = ctx.expressionList(1).expression(i).getStop();
+            Token variable = ctx.expressionList(0).expression(i).getStop();
+            AST variableAST = checkVar(variable);
 
-            AST variable = checkVar(operandName);
-            AST valueAST = new AST(NodeKind.INT_VAL_NODE, new IntData(Integer.valueOf(value.getText())),
-                    Type.INT_TYPE);
+            ExpressionContext value = ctx.expressionList(1).expression(i);
+            AST valueAST = this.visit(value);
 
-            assignNode.addChildren(variable, valueAST);
+            checkTypeError(variable.getLine(), "=", variableAST.getType(), valueAST.getType());
+
+            assignNode.addChildren(variableAST, valueAST);
             assignmentListNode.addChildren(assignNode);
         }
 
         return assignmentListNode;
     }
 
+    @Override
+    public AST visitAddOp(AddOpContext ctx) {
+
+        AST l = this.visit(ctx.expression(0));
+        AST r = this.visit(ctx.expression(1));
+
+        Token addOpToken = ctx.add_op;
+        checkTypeError(addOpToken.getLine(), addOpToken.getText(), l.getType(), r.getType());
+
+        return AST.newSubtree(NodeKind.fromValue(addOpToken.getText()), l.getType(), l, r);
+
+    }
+
+    @Override
+    public AST visitMulOp(MulOpContext ctx) {
+
+        AST l = this.visit(ctx.expression(0));
+        AST r = this.visit(ctx.expression(1));
+
+        Token mulOpToken = ctx.mul_op;
+        checkTypeError(mulOpToken.getLine(), mulOpToken.getText(), l.getType(), r.getType());
+
+        return AST.newSubtree(NodeKind.fromValue(mulOpToken.getText()), l.getType(), l, r);
+
+    }
+
+    @Override
+    public AST visitRelOp(RelOpContext ctx) {
+
+        AST l = this.visit(ctx.expression(0));
+        AST r = this.visit(ctx.expression(1));
+
+        Token relOpToken = ctx.rel_op;
+        checkTypeError(relOpToken.getLine(), relOpToken.getText(), l.getType(), r.getType());
+
+        return AST.newSubtree(NodeKind.fromValue(relOpToken.getText()), Type.BOOL_TYPE, l, r);
+
+    }
+
+    @Override
+    public AST visitOperandName(OperandNameContext ctx) {
+
+        return checkVar(ctx.IDENTIFIER(0).getSymbol());
+    }
+
+    @Override
+    public AST visitImportSpec(ImportSpecContext ctx) {
+        Token token = ctx.IDENTIFIER().getSymbol();
+        String text = token.getText();
+        int currentLine = token.getLine();
+        Integer index = vt.lookupVar(text);
+        if (index != -1) {
+            System.out.println(String.format(
+                    "SEMANTIC ERROR (%d): alias '%s' already declared at line %d.\n",
+                    currentLine, text, currentLine));
+            System.exit(1);
+        }
+        Integer idx = vt.addVar(text, currentLine, Type.NO_TYPE);
+        return new AST(NodeKind.IMPORT_SPEC, new VariableData(idx), Type.NO_TYPE);
+    }
 }

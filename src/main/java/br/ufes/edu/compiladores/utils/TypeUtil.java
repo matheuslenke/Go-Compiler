@@ -36,7 +36,6 @@ public class TypeUtil {
                 identifier = "int";
                 break;
             default:
-                identifier = "no_type";
                 break;
         }
         return TypeUtil.types.get(identifier);

@@ -1,5 +1,7 @@
 package br.ufes.edu.compiladores.ast;
 
+import java.util.NoSuchElementException;
+
 public enum NodeKind {
     // Operadores Básicos
     SHORT_VAR_DECL_NODE(":="),
@@ -35,6 +37,7 @@ public enum NodeKind {
     IDENTIFIER_LIST_NODE("identifier_list"),
     IDENTIFIER("identifier"),
     QUALIFIED_IDENTIFIER_NODE("qualified_identifier"),
+    CONVERSION_NODE("conversion"),
 
     // Signature
     SIGNATURE_NODE("signature"),
@@ -63,6 +66,19 @@ public enum NodeKind {
     @Override
     public String toString() {
         return this.token;
+    }
+
+    public static NodeKind fromValue(String token) {
+
+        if (token == null) {
+            throw new NoSuchElementException("Invalid NodeKind!");
+        }
+        for (final NodeKind v : values()) {
+            if (v.token.equals(token)) {
+                return v;
+            }
+        }
+        throw new NoSuchElementException("Invalid NodeKind!");
     }
 
     public static boolean hasData(NodeKind kind) {

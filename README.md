@@ -40,3 +40,34 @@ Um arquivo de mesmo nome e extensão com sufixo .errors deve ser adicionado em c
     make clean
  ```
 
+
+# Front End 
+## Analisador Léxico e Sintático
+Análise léxica e sintática feita utilizando de gramáticas disponíveis pela ferramenta ANTLR no [Github](https://github.com/antlr/grammars-v4/tree/master/golang) do projeto.
+
+## Analisador Semântico e AST
+
+- Operações aritméticas e de comparação básicas (+, ∗, <, ==, etc, etc).
+
+- Comandos de atribuição: Apenas comandos de atribuição simples (=): ```identiferList = expressionList```
+
+- Execução de blocos sequenciais de código.
+
+- Pelo menos uma estrutura de escolha (if-then-else) e uma de repetição (while,
+for, etc).
+
+- Declaração de variáveis apenas de forma explícita no formato: ```var identiferList type = expressionList```
+
+- Tipos básicos como int, real, string e bool (quando
+aplicável à LP): Diferentes tipos de int (uint8, uint16, uint32, etc...) e float (float32 e float64) reduzidos apenas para o tipo int e float. 
+
+- Pelo menos um tipo composto (vetores, listas em
+Python, etc): Utilizado apenas arrays
+
+- Declaração e execução correta de chamadas de função com número de parâmetros fixos (não precisa ser varargs).
+
+- Sistema de tipos que trata adequadamente todos os tipos permitidos.
+
+- Operaçõs de IO básicas sobre stdin e stdout para permitir testes.
+
+
