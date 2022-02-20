@@ -45,6 +45,7 @@ public enum NodeKind {
     PARAMETERS_NODE("parameters"),
     RESULT_NODE("result"),
     PARAMETER_DECLARATION("parameter_declaration"),
+    RETURN_NODE("return"),
 
     // Declarações de Tipo
     TYPE_DECLARATION("type_declaration"),
@@ -58,6 +59,7 @@ public enum NodeKind {
     CHANNEL_TYPE("channel_type"),
     NIL_NODE("nil"),
     CODE_BLOCK("block"),
+
 
     // Conversões de tipo
     I2F_NODE("I2F");
