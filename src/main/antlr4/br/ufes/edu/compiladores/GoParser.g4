@@ -191,8 +191,6 @@ rangeClause: (
 
 goStmt: GO expression;
 
-paramType_: typeLit | literalType;
-
 type_: typeName | typeLit | L_PAREN type_ R_PAREN;
 
 typeName: IDENTIFIER;

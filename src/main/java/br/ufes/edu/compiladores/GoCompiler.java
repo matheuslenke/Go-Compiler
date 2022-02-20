@@ -1,13 +1,10 @@
 package br.ufes.edu.compiladores;
 
 import java.io.IOException;
-import java.util.Arrays;
-
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.gui.TreeViewer;
 import br.ufes.edu.compiladores.checker.SemanticChecker;
 
 /*

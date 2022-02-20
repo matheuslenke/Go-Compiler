@@ -6,11 +6,13 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import br.ufes.edu.compiladores.GoParser.AddOpContext;
+import br.ufes.edu.compiladores.GoParser.ArrayLengthContext;
 import br.ufes.edu.compiladores.GoParser.ArrayTypeContext;
 import br.ufes.edu.compiladores.GoParser.AssignmentContext;
 import br.ufes.edu.compiladores.GoParser.BlockContext;
 import br.ufes.edu.compiladores.GoParser.Boolean_Context;
 import br.ufes.edu.compiladores.GoParser.DeclarationContext;
+import br.ufes.edu.compiladores.GoParser.ElementTypeContext;
 import br.ufes.edu.compiladores.GoParser.ExpressionContext;
 import br.ufes.edu.compiladores.GoParser.ForStmtContext;
 import br.ufes.edu.compiladores.GoParser.FunctionDeclContext;
@@ -98,6 +100,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             case INT_TYPE:
                 return new AST(NodeKind.VAR_DECL_NODE, new VariableData(idx), lastDeclType);
             case FUNC_TYPE:
+                return new AST(NodeKind.FUNC_DECL_NODE, new VariableData(idx), lastDeclType);
+            case ARRAY_TYPE:
                 return new AST(NodeKind.FUNC_DECL_NODE, new VariableData(idx), lastDeclType);
             case NO_TYPE:
                 return new AST(NodeKind.VAR_DECL_NODE, new EmptyData(), lastDeclType);
@@ -320,16 +324,10 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     @Override
     public AST visitType_(final Type_Context ctx) {
         if (ctx.typeLit() != null) {
-            AST t = visit(ctx.typeLit());
-            return t;
+            return visit(ctx.typeLit());
         }
-
-        AST typeName = null;
         if (ctx.typeName() != null) {
-            typeName = visit(ctx.typeName());
-        }
-        if (typeName != null) {
-            return typeName;
+            return visit(ctx.typeName());
         }
         if (ctx.type_() != null) {
             return visit(ctx.type_());
@@ -419,11 +417,9 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             for (TerminalNode identifier : identifierList) {
                 AST newVar = this.newVar(identifier.getSymbol());
                 if (type.getType() == Type.ARRAY_TYPE) {
-                    type.addChildren(newVar);
-                    variableDeclaration.addChildren(type);
-                } else {
-                    variableDeclaration.addChildren(newVar);
+                    newVar.addChildren(type.getChildren().toArray(new AST[type.getChildren().size()]));
                 }
+                variableDeclaration.addChildren(newVar);
             }
         }
         return variableDeclaration;
@@ -591,28 +587,37 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     @Override
     public AST visitArrayType(ArrayTypeContext ctx) {
-        AST length = this.visit(ctx.arrayLength().expression());
-        if (length == null) {
-            System.out.println(String.format("SEMANTIC ERROR (%d): expression invalid",
-                    ctx.L_BRACKET().getSymbol().getLine()));
-            System.exit(1);
-        }
 
         AST type = this.visit(ctx.elementType());
-        if (type == null) {
+        AST length = this.visit(ctx.arrayLength());
+
+        lastDeclType = Type.ARRAY_TYPE;
+        return AST.newSubtree(NodeKind.ARRAY_TYPE, Type.ARRAY_TYPE, length, type);
+    }
+
+    @Override
+    public AST visitArrayLength(ArrayLengthContext ctx) {
+        AST length = this.visit(ctx.expression());
+
+        if (length == null) {
             System.out.println(String.format("SEMANTIC ERROR (%d): expression invalid",
-                    ctx.L_BRACKET().getSymbol().getLine()));
-            System.exit(1);
-        }
-        if (length.getType() != Type.INT_TYPE) {
-            System.out.println(String.format("SEMANTIC ERROR (%d): array length needs to be of type int",
-                    ctx.L_BRACKET().getSymbol().getLine()));
+                    ctx.getStart().getLine()));
             System.exit(1);
         }
 
-        AST arrayDecl = new AST(NodeKind.ARRAY_TYPE, new EmptyData(), Type.ARRAY_TYPE);
-        arrayDecl.addChildren(length, type);
-        return arrayDecl;
+        if (length.getType() != Type.INT_TYPE) {
+            System.out.println(String.format("SEMANTIC ERROR (%d): array length needs to be of type int",
+                    ctx.getStart().getLine()));
+            System.exit(1);
+        }
+        return AST.newSubtree(NodeKind.ARRAY_LENGTH_NODE, Type.NO_TYPE, length);
+    }
+
+    @Override
+    public AST visitElementType(ElementTypeContext ctx) {
+
+        AST type = this.visit(ctx.type_());
+        return AST.newSubtree(NodeKind.ARRAY_ELEMENT_TYPE_NODE, type.getType());
     }
 
     @Override
