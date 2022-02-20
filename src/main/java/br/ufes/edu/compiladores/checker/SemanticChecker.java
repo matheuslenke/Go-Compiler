@@ -22,6 +22,7 @@ import br.ufes.edu.compiladores.GoParser.ImportSpecContext;
 import br.ufes.edu.compiladores.GoParser.IntegerContext;
 import br.ufes.edu.compiladores.GoParser.MulOpContext;
 import br.ufes.edu.compiladores.GoParser.NilTypeContext;
+import br.ufes.edu.compiladores.GoParser.OperandContext;
 import br.ufes.edu.compiladores.GoParser.OperandNameContext;
 import br.ufes.edu.compiladores.GoParser.ParameterDeclContext;
 import br.ufes.edu.compiladores.GoParser.ParametersContext;
@@ -380,10 +381,30 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         lastDeclType = Type.BOOL_TYPE;
         return new AST(NodeKind.BOOL_VAL_NODE, new BoolData(Boolean.valueOf(ctx.boolValue.getText())), Type.BOOL_TYPE);
     }
+    /*
+     * <-------- Visitadores de Expressions -------->
+     */
+
+    @Override
+    public AST visitOperand(OperandContext ctx) {
+        if (ctx.literal() != null) {
+            return this.visit(ctx.literal());
+        }
+        if (ctx.operandName() != null) {
+            return this.visit(ctx.operandName());
+        }
+        if (ctx.expression() != null) {
+            AST exp = this.visit(ctx.expression());
+            AST parenthesis = new AST(exp.getKind(), new EmptyData(), lastDeclType);
+            AST[] expChild = new AST[exp.getChildren().size()];
+            parenthesis.addChildren(exp.getChildren().toArray(expChild));
+            return parenthesis;
+        }
+        return null;
+    }
 
     /*
-     * <----------------- Operadores do Declaração de variáveis e assignment
-     * ----------------->
+     * <-------- Operadores do Declaração de variáveis e assignment -------->
      */
 
     @Override
