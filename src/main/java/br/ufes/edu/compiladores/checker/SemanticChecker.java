@@ -26,8 +26,8 @@ import br.ufes.edu.compiladores.GoParser.ParametersContext;
 import br.ufes.edu.compiladores.GoParser.RealContext;
 import br.ufes.edu.compiladores.GoParser.RelOpContext;
 import br.ufes.edu.compiladores.GoParser.ResultContext;
-import br.ufes.edu.compiladores.GoParser.ShortVarDeclContext;
 import br.ufes.edu.compiladores.GoParser.ReturnStmtContext;
+import br.ufes.edu.compiladores.GoParser.ShortVarDeclContext;
 import br.ufes.edu.compiladores.GoParser.SourceFileContext;
 import br.ufes.edu.compiladores.GoParser.StatementContext;
 import br.ufes.edu.compiladores.GoParser.String_Context;
@@ -59,7 +59,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     protected Type lastDeclType; // Variável "global" com o último tipo declarado.
 
     // Testa se o dado token foi declarado antes.
-    AST checkVar(final Token token) {
+    private AST checkVar(final Token token) {
         final String text = token.getText();
         final int line = token.getLine();
         final Integer index = vt.lookupVar(text);
@@ -74,7 +74,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     }
 
     // Cria uma nova variável a partir do dado token.
-    AST newVar(Token token) {
+    private AST newVar(Token token) {
         String text = token.getText();
         int currentLine = token.getLine();
         Integer index = vt.lookupVar(text);
@@ -162,6 +162,37 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
     }
 
+    private void checkReturnCorrect(int lineNo, AST result, AST block) {
+
+        AST returnBlock = block.getChildren().get(block.getChildren().size() - 1);
+
+        int quantSignature = 0;
+
+        if (result != null) {
+            quantSignature = result.getChildren().size();
+        }
+
+        if (returnBlock.getKind() != NodeKind.RETURN_NODE && quantSignature == 0) {
+            return;
+        }
+
+        if (returnBlock.getKind() != NodeKind.RETURN_NODE && quantSignature > 0) {
+            System.out.println(String.format(
+                    "SEMANTIC ERROR (%d): return expression missing, return should be the last statement of the function",
+                    lineNo));
+            System.exit(1);
+        }
+        int quantReturnStmt = returnBlock.getChildren().size();
+
+        if (quantSignature != quantReturnStmt) {
+            System.out.println(String.format(
+                    "SEMANTIC ERROR (%d): number of values returned (%d) different from specified on function signature (%d)",
+                    lineNo, quantReturnStmt, quantSignature));
+            System.exit(1);
+        }
+
+    }
+
     // ----------------------------------------------------------------------------
     // Visitadores.
 
@@ -229,32 +260,6 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
 
         return decl;
-    }
-
-    private void checkReturnCorrect(int lineNo, AST result, AST block) {
-
-        AST returnBlock = block.getChildren().get(block.getChildren().size() - 1);
-        
-        int quantSignature = 0;
-
-        if (result != null) {
-            quantSignature = result.getChildren().size();
-        }
-        if (returnBlock.getKind() != NodeKind.RETURN_NODE && quantSignature > 0) {
-            System.out.println(String.format(
-                    "SEMANTIC ERROR (%d): return expression missing, return should be the last statement of the function",
-                    lineNo));
-            System.exit(1);
-        }
-        int quantReturnStmt = returnBlock.getChildren().size();
-
-        if (quantSignature != quantReturnStmt) {
-            System.out.println(String.format(
-                    "SEMANTIC ERROR (%d): number of values returned (%d) different from specified on function signature (%d)",
-                    lineNo, quantReturnStmt, quantSignature));
-            System.exit(1);
-        }
-
     }
 
     @Override
@@ -675,11 +680,10 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
         AST returnAst = new AST(NodeKind.RETURN_NODE, new EmptyData(), Type.NO_TYPE);
 
-
         if (ctx.expressionList() != null) {
-        for (ExpressionContext expressionContext : ctx.expressionList().expression()) {
-            returnAst.addChildren(this.visit(expressionContext));
-        }
+            for (ExpressionContext expressionContext : ctx.expressionList().expression()) {
+                returnAst.addChildren(this.visit(expressionContext));
+            }
         }
 
         return returnAst;

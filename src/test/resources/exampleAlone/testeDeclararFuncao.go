@@ -5,6 +5,7 @@ import "fmt"
 func func1() {
 	var s string = "func1"
 	fmt.Println(s)
+	return
 }
 
 func func2() string {
@@ -18,11 +19,8 @@ func func2() string {
 
 func func3(a, b string) (string, string) {
 	func1()
-	var s3 string = "func1"
-	fmt.Println(s3)
-	var s4 = "Hello world"
-
-	return s3, s4, "teste"
+	var s3, s4 string = "func1", "Hello world" + "t"
+	return s3, s4
 }
 
 func func4() {
