@@ -26,6 +26,7 @@ import br.ufes.edu.compiladores.GoParser.ParametersContext;
 import br.ufes.edu.compiladores.GoParser.RealContext;
 import br.ufes.edu.compiladores.GoParser.RelOpContext;
 import br.ufes.edu.compiladores.GoParser.ResultContext;
+import br.ufes.edu.compiladores.GoParser.ShortVarDeclContext;
 import br.ufes.edu.compiladores.GoParser.SignatureContext;
 import br.ufes.edu.compiladores.GoParser.SourceFileContext;
 import br.ufes.edu.compiladores.GoParser.StatementContext;
@@ -33,6 +34,7 @@ import br.ufes.edu.compiladores.GoParser.String_Context;
 import br.ufes.edu.compiladores.GoParser.TypeNameContext;
 import br.ufes.edu.compiladores.GoParser.Type_Context;
 import br.ufes.edu.compiladores.GoParser.VarDeclExplTypeContext;
+import br.ufes.edu.compiladores.GoParser.VarDeclImplTypeContext;
 import br.ufes.edu.compiladores.GoParserBaseVisitor;
 import br.ufes.edu.compiladores.ast.AST;
 import br.ufes.edu.compiladores.ast.BoolData;
@@ -286,7 +288,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     @Override
     public AST visitType_(final Type_Context ctx) {
         if (ctx.typeLit() != null) {
-            visit(ctx.typeLit());
+            AST t = visit(ctx.typeLit());
+            return t;
         }
 
         AST typeName = null;
@@ -297,7 +300,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             return typeName;
         }
         if (ctx.type_() != null) {
-            visit(ctx.type_());
+            return visit(ctx.type_());
         }
         return null;
     }
@@ -351,7 +354,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     @Override
     public AST visitVarDeclExplType(VarDeclExplTypeContext ctx) {
-        this.visit(ctx.type_()); // visita para definir qual o tipo das variáveis
+        AST type = this.visit(ctx.type_()); // visita para definir qual o tipo das variáveis
         AST variableDeclaration = new AST(NodeKind.VAR_LIST_NODE, new EmptyData(), Type.NO_TYPE);
 
         List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
@@ -378,7 +381,44 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             }
         } else {
             for (TerminalNode identifier : identifierList) {
-                variableDeclaration.addChildren(this.newVar(identifier.getSymbol()));
+                AST newVar = this.newVar(identifier.getSymbol());
+                if (type.getType() == Type.ARRAY_TYPE) {
+                    type.addChildren(newVar);
+                    variableDeclaration.addChildren(type);
+                } else {
+                    variableDeclaration.addChildren(newVar);
+                }
+            }
+        }
+        return variableDeclaration;
+    }
+
+    @Override
+    public AST visitVarDeclImplType(VarDeclImplTypeContext ctx) {
+        AST variableDeclaration = new AST(NodeKind.VAR_LIST_NODE, new EmptyData(), Type.NO_TYPE);
+
+        List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
+
+        if (ctx.expressionList() != null) {
+            int quantIdentifier = ctx.identifierList().IDENTIFIER().size();
+            int quantExpression = ctx.expressionList().expression().size();
+            checkWrongAssignCount(ctx.start.getLine(), quantIdentifier, quantExpression);
+
+            // Para cada variável declarada atribuímos novo nó com o valor declarado
+            for (int i = 0; i < quantIdentifier; i++) {
+                AST assignNode = new AST(NodeKind.ASSIGN_NODE, new EmptyData(), Type.NO_TYPE);
+
+                Token identifierSymbol = identifierList.get(i).getSymbol();
+                AST newVar = this.newVar(identifierSymbol);
+
+                AST value = this.visit(ctx.expressionList().expression(i));
+
+                // checkTypeError(identifierSymbol.getLine(), NodeKind.EQ_NODE.toString(),
+                // newVar.getType(),
+                // value.getType());
+
+                assignNode.addChildren(newVar, value);
+                variableDeclaration.addChildren(assignNode);
             }
         }
         return variableDeclaration;
@@ -415,7 +455,6 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             assignNode.addChildren(variableAST, valueAST);
             assignmentListNode.addChildren(assignNode);
         }
-
         return assignmentListNode;
     }
 
@@ -493,22 +532,28 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     @Override
     public AST visitArrayType(ArrayTypeContext ctx) {
-        AST arrayLength = this.visit(ctx.arrayLength().expression());
-        if (arrayLength == null) {
-            String.format("SEMANTIC ERROR (%d): expression invalid",
-                    ctx.L_BRACKET().getSymbol().getLine());
+        AST length = this.visit(ctx.arrayLength().expression());
+        if (length == null) {
+            System.out.println(String.format("SEMANTIC ERROR (%d): expression invalid",
+                    ctx.L_BRACKET().getSymbol().getLine()));
             System.exit(1);
         }
 
         AST type = this.visit(ctx.elementType());
         if (type == null) {
-            String.format("SEMANTIC ERROR (%d): expression invalid",
-                    ctx.L_BRACKET().getSymbol().getLine());
+            System.out.println(String.format("SEMANTIC ERROR (%d): expression invalid",
+                    ctx.L_BRACKET().getSymbol().getLine()));
             System.exit(1);
         }
+        if (length.getType() != Type.INT_TYPE) {
+            System.out.println(String.format("SEMANTIC ERROR (%d): array length needs to be of type int",
+                    ctx.L_BRACKET().getSymbol().getLine()));
+            System.exit(1);
+        }
+        AST ArrayLengthNode = new AST(NodeKind.ARRAY_LENGTH_NODE, length.getData(), length.getType());
 
         AST arrayDecl = new AST(NodeKind.ARRAY_TYPE, new EmptyData(), Type.ARRAY_TYPE);
-        arrayDecl.addChildren(arrayLength, type);
+        arrayDecl.addChildren(length, type);
         return arrayDecl;
     }
 
@@ -524,6 +569,10 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
         return blockNode;
     }
+
+    /*
+     * <----------------- Declaração de If Else ----------------->
+     */
 
     @Override
     public AST visitIfStmt(IfStmtContext ctx) {
@@ -546,6 +595,10 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
         return ifNode;
     }
+
+    /*
+     * <----------------- Declaração de Loops ----------------->
+     */
 
     @Override
     public AST visitForStmt(ForStmtContext ctx) {

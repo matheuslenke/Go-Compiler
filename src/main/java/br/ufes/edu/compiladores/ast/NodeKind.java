@@ -50,6 +50,7 @@ public enum NodeKind {
     TYPE_DECLARATION("type_declaration"),
     TYPE_USE("type_use"),
     ARRAY_TYPE("array_type"),
+    ARRAY_LENGTH_NODE("array_length"),
     STRUCT_TYPE("struct_type"),
     FUNCTION_TYPE("function_type"),
     INTERFACE_TYPE("interface_type"),
