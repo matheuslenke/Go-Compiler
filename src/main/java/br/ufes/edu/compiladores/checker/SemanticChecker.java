@@ -428,7 +428,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
                 AST value = this.visit(ctx.expressionList().expression(i));
 
-                checkTypeError(identifierSymbol.getLine(), NodeKind.EQ_NODE.toString(), newVar.getType(),
+                checkTypeError(identifierSymbol.getLine(), NodeKind.ASSIGN_NODE.toString(), newVar.getType(),
                         value.getType());
 
                 assignNode.addChildren(newVar, value);
@@ -526,7 +526,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 System.exit(1);
             }
 
-            checkTypeError(variable.getLine(), NodeKind.EQ_NODE.toString(), variableAST.getType(), valueAST.getType());
+            checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), variableAST.getType(), valueAST.getType());
 
             assignNode.addChildren(variableAST, valueAST);
             assignmentListNode.addChildren(assignNode);
@@ -638,6 +638,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     public AST visitElementType(ElementTypeContext ctx) {
 
         AST type = this.visit(ctx.type_());
+        checkTypeError(ctx.type_().getStart().getLine(), NodeKind.ARRAY_ELEMENT_TYPE_NODE.toString(), Type.INT_TYPE, type.getType());
         return AST.newSubtree(NodeKind.ARRAY_ELEMENT_TYPE_NODE, type.getType());
     }
 
