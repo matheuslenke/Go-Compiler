@@ -11,7 +11,9 @@ import br.ufes.edu.compiladores.GoParser.ArrayTypeContext;
 import br.ufes.edu.compiladores.GoParser.AssignmentContext;
 import br.ufes.edu.compiladores.GoParser.BlockContext;
 import br.ufes.edu.compiladores.GoParser.Boolean_Context;
+import br.ufes.edu.compiladores.GoParser.CompositeLitContext;
 import br.ufes.edu.compiladores.GoParser.DeclarationContext;
+import br.ufes.edu.compiladores.GoParser.ElementContext;
 import br.ufes.edu.compiladores.GoParser.ElementTypeContext;
 import br.ufes.edu.compiladores.GoParser.ExpressionContext;
 import br.ufes.edu.compiladores.GoParser.ForStmtContext;
@@ -20,6 +22,7 @@ import br.ufes.edu.compiladores.GoParser.IfStmtContext;
 import br.ufes.edu.compiladores.GoParser.ImportDeclContext;
 import br.ufes.edu.compiladores.GoParser.ImportSpecContext;
 import br.ufes.edu.compiladores.GoParser.IntegerContext;
+import br.ufes.edu.compiladores.GoParser.LiteralValueContext;
 import br.ufes.edu.compiladores.GoParser.MulOpContext;
 import br.ufes.edu.compiladores.GoParser.NilTypeContext;
 import br.ufes.edu.compiladores.GoParser.OperandContext;
@@ -526,7 +529,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 System.exit(1);
             }
 
-            checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), variableAST.getType(), valueAST.getType());
+            checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), variableAST.getType(),
+                    valueAST.getType());
 
             assignNode.addChildren(variableAST, valueAST);
             assignmentListNode.addChildren(assignNode);
@@ -638,7 +642,6 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     public AST visitElementType(ElementTypeContext ctx) {
 
         AST type = this.visit(ctx.type_());
-        checkTypeError(ctx.type_().getStart().getLine(), NodeKind.ARRAY_ELEMENT_TYPE_NODE.toString(), Type.INT_TYPE, type.getType());
         return AST.newSubtree(NodeKind.ARRAY_ELEMENT_TYPE_NODE, type.getType());
     }
 
@@ -715,4 +718,13 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
         return returnAst;
     }
+
+    @Override
+    public AST visitCompositeLit(CompositeLitContext ctx) {
+        AST type = this.visit(ctx.literalType());
+
+
+        return AST.newSubtree(NodeKind.ASSIGN_NODE, Type.NO_TYPE, type);
+    }
+
 }
