@@ -27,6 +27,7 @@ import br.ufes.edu.compiladores.GoParser.RealContext;
 import br.ufes.edu.compiladores.GoParser.RelOpContext;
 import br.ufes.edu.compiladores.GoParser.ResultContext;
 import br.ufes.edu.compiladores.GoParser.ShortVarDeclContext;
+import br.ufes.edu.compiladores.GoParser.ReturnStmtContext;
 import br.ufes.edu.compiladores.GoParser.SignatureContext;
 import br.ufes.edu.compiladores.GoParser.SourceFileContext;
 import br.ufes.edu.compiladores.GoParser.StatementContext;
@@ -211,8 +212,11 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
         decl.addChildren(signature);
 
-        AST block = this.visit(ctx.block());
-        decl.addChildren(block);
+        if (ctx.block() != null) {
+            AST block = this.visit(ctx.block());
+
+            decl.addChildren(block);
+        }
 
         return decl;
     }
@@ -615,5 +619,22 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         forNode.addChildren(this.visit(ctx.block()));
 
         return forNode;
+    }
+
+    @Override
+    public AST visitReturnStmt(ReturnStmtContext ctx) {
+
+        if (ctx.expressionList() == null) {
+            String.format("SEMANTIC ERROR (%d): return invalid",
+                    ctx.RETURN().getSymbol().getLine());
+            System.exit(1);
+        }
+
+        AST returnAst = new AST(NodeKind.RETURN_NODE, new EmptyData(), Type.NO_TYPE);
+
+        for (ExpressionContext expressionContext : ctx.expressionList().expression()) {
+            returnAst.addChildren(this.visit(expressionContext));
+        }
+        return returnAst;
     }
 }

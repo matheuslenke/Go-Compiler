@@ -92,7 +92,7 @@ public class AST {
 
 				case STR_VAL_NODE:
 					StringData strData = (StringData) this.data;
-					System.err.print("@" + st.get(strData.getValue()));
+					System.err.print("@" + strData.getValue());
 					break;
 
 				case INT_VAL_NODE:
