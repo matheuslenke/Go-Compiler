@@ -28,7 +28,6 @@ import br.ufes.edu.compiladores.GoParser.RelOpContext;
 import br.ufes.edu.compiladores.GoParser.ResultContext;
 import br.ufes.edu.compiladores.GoParser.ShortVarDeclContext;
 import br.ufes.edu.compiladores.GoParser.ReturnStmtContext;
-import br.ufes.edu.compiladores.GoParser.SignatureContext;
 import br.ufes.edu.compiladores.GoParser.SourceFileContext;
 import br.ufes.edu.compiladores.GoParser.StatementContext;
 import br.ufes.edu.compiladores.GoParser.String_Context;
@@ -201,7 +200,6 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     // <---------------- Visitadores dos FUNÇÕES ---------------->
     @Override
     public AST visitFunctionDecl(final FunctionDeclContext ctx) {
-        AST signature = visit(ctx.signature());
         lastDeclType = Type.FUNC_TYPE;
         AST funcVar = newVar(ctx.IDENTIFIER().getSymbol());
 
@@ -210,10 +208,22 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         AST decl = new AST(NodeKind.FUNC_DECL_NODE, new VariableData(varData.getIndex()),
                 lastDeclType);
 
-        decl.addChildren(signature);
+        AST parameters = this.visit(ctx.signature().parameters());
+        AST result = null;
+        if (ctx.signature().result() != null) {
+            result = visit(ctx.signature().result());
+        }
+        if (parameters != null) {
+            decl.addChildren(parameters);
+        }
+        if (result != null) {
+            decl.addChildren(result);
+        }
 
         if (ctx.block() != null) {
             AST block = this.visit(ctx.block());
+
+            checkReturnCorrect(ctx.FUNC().getSymbol().getLine(), result, block);
 
             decl.addChildren(block);
         }
@@ -221,23 +231,30 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         return decl;
     }
 
-    @Override
-    public AST visitSignature(final SignatureContext ctx) {
-        AST parameters = this.visit(ctx.parameters());
-        AST result = null;
-        if (ctx.result() != null) {
-            result = visit(ctx.result());
-        }
+    private void checkReturnCorrect(int lineNo, AST result, AST block) {
 
-        AST p = new AST(NodeKind.SIGNATURE_NODE, new EmptyData(), Type.NO_TYPE);
+        AST returnBlock = block.getChildren().get(block.getChildren().size() - 1);
+        
+        int quantSignature = 0;
 
-        if (parameters != null) {
-            p.addChildren(parameters);
-        }
         if (result != null) {
-            p.addChildren(result);
+            quantSignature = result.getChildren().size();
         }
-        return p;
+        if (returnBlock.getKind() != NodeKind.RETURN_NODE && quantSignature > 0) {
+            System.out.println(String.format(
+                    "SEMANTIC ERROR (%d): return expression missing, return should be the last statement of the function",
+                    lineNo));
+            System.exit(1);
+        }
+        int quantReturnStmt = returnBlock.getChildren().size();
+
+        if (quantSignature != quantReturnStmt) {
+            System.out.println(String.format(
+                    "SEMANTIC ERROR (%d): number of values returned (%d) different from specified on function signature (%d)",
+                    lineNo, quantReturnStmt, quantSignature));
+            System.exit(1);
+        }
+
     }
 
     @Override
@@ -278,14 +295,20 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     @Override
     public AST visitResult(final ResultContext ctx) {
-        AST parameters = this.visit(ctx.parameters());
-        if (parameters != null) {
-            AST result = new AST(NodeKind.RESULT_NODE, new EmptyData(), Type.NO_TYPE);
-            AST[] children = new AST[result.getChildren().size()];
-            result.addChildren(parameters.getChildren().toArray(children));
-            return result;
+        AST result = new AST(NodeKind.RESULT_NODE, new EmptyData(), Type.NO_TYPE);
+        if (ctx.parameters() != null) {
+            AST parameters = this.visit(ctx.parameters());
+            if (parameters != null) {
+
+                AST[] children = new AST[result.getChildren().size()];
+                result.addChildren(parameters.getChildren().toArray(children));
+                return result;
+            }
         }
-        return visit(ctx.type_());
+        if (ctx.type_() != null) {
+            result.addChildren(this.visit(ctx.type_()));
+        }
+        return result;
     }
 
     // type_: typeName | typeLit | L_PAREN type_ R_PAREN
@@ -325,18 +348,21 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
      */
     @Override
     public AST visitInteger(final IntegerContext ctx) {
+        lastDeclType = Type.INT_TYPE;
         return new AST(NodeKind.INT_VAL_NODE, new IntData(Integer.parseInt(ctx.DECIMAL_LIT().getText())),
                 Type.INT_TYPE);
     }
 
     @Override
     public AST visitString_(final String_Context ctx) {
+        lastDeclType = Type.STR_TYPE;
         Integer strIndex = this.st.add(ctx.INTERPRETED_STRING_LIT().getText().replace("\"", ""));
         return new AST(NodeKind.STR_VAL_NODE, new StringData(strIndex), Type.STR_TYPE);
     }
 
     @Override
     public AST visitReal(final RealContext ctx) {
+        lastDeclType = Type.FLOAT_TYPE;
         return new AST(NodeKind.REAL_VAL_NODE, new RealData(Double.parseDouble(ctx.FLOAT_LIT().getText())),
                 Type.FLOAT_TYPE);
     }
@@ -348,6 +374,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     @Override
     public AST visitBoolean_(Boolean_Context ctx) {
+        lastDeclType = Type.BOOL_TYPE;
         return new AST(NodeKind.BOOL_VAL_NODE, new BoolData(Boolean.valueOf(ctx.boolValue.getText())), Type.BOOL_TYPE);
     }
 
@@ -413,13 +440,36 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 AST assignNode = new AST(NodeKind.ASSIGN_NODE, new EmptyData(), Type.NO_TYPE);
 
                 Token identifierSymbol = identifierList.get(i).getSymbol();
-                AST newVar = this.newVar(identifierSymbol);
-
                 AST value = this.visit(ctx.expressionList().expression(i));
 
-                // checkTypeError(identifierSymbol.getLine(), NodeKind.EQ_NODE.toString(),
-                // newVar.getType(),
-                // value.getType());
+                AST newVar = this.newVar(identifierSymbol);
+
+                assignNode.addChildren(newVar, value);
+                variableDeclaration.addChildren(assignNode);
+            }
+        }
+        return variableDeclaration;
+    }
+
+    @Override
+    public AST visitShortVarDecl(ShortVarDeclContext ctx) {
+        AST variableDeclaration = new AST(NodeKind.VAR_LIST_NODE, new EmptyData(), Type.NO_TYPE);
+
+        List<TerminalNode> identifierList = ctx.identifierList().IDENTIFIER();
+
+        if (ctx.expressionList() != null) {
+            int quantIdentifier = ctx.identifierList().IDENTIFIER().size();
+            int quantExpression = ctx.expressionList().expression().size();
+            checkWrongAssignCount(ctx.start.getLine(), quantIdentifier, quantExpression);
+
+            // Para cada variável declarada atribuímos novo nó com o valor declarado
+            for (int i = 0; i < quantIdentifier; i++) {
+                AST assignNode = new AST(NodeKind.SHORT_VAR_DECL_NODE, new EmptyData(), Type.NO_TYPE);
+
+                Token identifierSymbol = identifierList.get(i).getSymbol();
+                AST value = this.visit(ctx.expressionList().expression(i));
+
+                AST newVar = this.newVar(identifierSymbol);
 
                 assignNode.addChildren(newVar, value);
                 variableDeclaration.addChildren(assignNode);
@@ -449,8 +499,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             AST valueAST = this.visit(value);
 
             if (valueAST == null) {
-                String.format("SEMANTIC ERROR (%d): expression invalid",
-                        variable.getLine());
+                System.out.println(String.format("SEMANTIC ERROR (%d): expression invalid",
+                        variable.getLine()));
                 System.exit(1);
             }
 
@@ -554,7 +604,6 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                     ctx.L_BRACKET().getSymbol().getLine()));
             System.exit(1);
         }
-        AST ArrayLengthNode = new AST(NodeKind.ARRAY_LENGTH_NODE, length.getData(), length.getType());
 
         AST arrayDecl = new AST(NodeKind.ARRAY_TYPE, new EmptyData(), Type.ARRAY_TYPE);
         arrayDecl.addChildren(length, type);
@@ -607,8 +656,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     @Override
     public AST visitForStmt(ForStmtContext ctx) {
         if (ctx.expression() == null) {
-            String.format("SEMANTIC ERROR (%d): expression invalid",
-                    ctx.FOR().getSymbol().getLine());
+            System.out.println(String.format("SEMANTIC ERROR (%d): expression invalid",
+                    ctx.FOR().getSymbol().getLine()));
             System.exit(1);
         }
 
@@ -624,17 +673,15 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     @Override
     public AST visitReturnStmt(ReturnStmtContext ctx) {
 
-        if (ctx.expressionList() == null) {
-            String.format("SEMANTIC ERROR (%d): return invalid",
-                    ctx.RETURN().getSymbol().getLine());
-            System.exit(1);
-        }
-
         AST returnAst = new AST(NodeKind.RETURN_NODE, new EmptyData(), Type.NO_TYPE);
 
+
+        if (ctx.expressionList() != null) {
         for (ExpressionContext expressionContext : ctx.expressionList().expression()) {
             returnAst.addChildren(this.visit(expressionContext));
         }
+        }
+
         return returnAst;
     }
 }

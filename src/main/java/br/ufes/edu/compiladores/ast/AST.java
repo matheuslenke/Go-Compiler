@@ -40,6 +40,10 @@ public class AST {
 		return this.type;
 	}
 
+	public NodeKind getKind() {
+		return this.kind;
+	}
+
 	// Cria um nó e pendura todos os filhos passados como argumento.
 	public static AST newSubtree(final NodeKind kind, final Type type, final AST... children) {
 		final AST node = new AST(kind, null, type);
