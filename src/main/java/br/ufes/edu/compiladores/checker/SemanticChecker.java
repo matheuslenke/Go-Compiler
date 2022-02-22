@@ -655,7 +655,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
         checkTypeError(addOpToken.getLine(), addOpToken.getText(), lType, rType);
 
-        // Falta a conversão da soma entre os dois items!
+        lastDeclType = lType;
         return AST.newSubtree(NodeKind.fromValue(addOpToken.getText()), lType, l, r);
 
     }
@@ -681,7 +681,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
 
         checkTypeError(mulOpToken.getLine(), mulOpToken.getText(), lType, rType);
-
+        lastDeclType = lType;
         return AST.newSubtree(NodeKind.fromValue(mulOpToken.getText()), lType, l, r);
 
     }
@@ -706,6 +706,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
         checkTypeError(relOpToken.getLine(), relOpToken.getText(), lType, rType);
 
+        lastDeclType = Type.BOOL_TYPE;
         return AST.newSubtree(NodeKind.fromValue(relOpToken.getText()), Type.BOOL_TYPE, l, r);
 
     }
