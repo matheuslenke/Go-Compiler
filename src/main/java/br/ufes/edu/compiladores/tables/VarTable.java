@@ -80,12 +80,13 @@ public final class VarTable {
         private final String name;
         private final int line;
         private final Type type;
-        private Type subType;
+        private final Type subType;
 
         Entry(String name, int line, Type type) {
             this.name = name;
             this.line = line;
             this.type = type;
+            this.subType = null;
         }
 
         Entry(String name, int line, Type type, Type subType) {

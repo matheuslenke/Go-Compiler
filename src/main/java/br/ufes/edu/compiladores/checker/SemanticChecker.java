@@ -69,11 +69,11 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     protected Type lastDeclType; // Variável "global" com o último tipo declarado.
     protected Type lastDeclSubType; // Variável "global" com o último subtipo declarado, para tipos compostos
 
-
-    private void semanticError (String message) {
+    private void semanticError(String message) {
         System.out.println(message);
         System.exit(1);
     }
+
     // Testa se o dado token foi declarado antes.
     private AST checkVar(final Token token) {
         final String text = token.getText();
@@ -102,12 +102,12 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
         Integer idx;
         Type t;
-        if(lastDeclType == Type.ARRAY_TYPE) {
+        if (lastDeclType == Type.ARRAY_TYPE) {
             idx = vt.addVar(text, currentLine, lastDeclType, lastDeclSubType);
             t = vt.getType(idx);
         } else {
-           idx = vt.addVar(text, currentLine, lastDeclType);
-           t = vt.getType(idx);
+            idx = vt.addVar(text, currentLine, lastDeclType);
+            t = vt.getType(idx);
         }
 
         // Constrói o nó para a nova variável
@@ -520,9 +520,10 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
             // Verificações de atribuição
             NodeKind leftKind = leftExpressionAST.getKind();
-            if(!NodeKind.isVariable(leftKind)) {
-                String message = String.format("SEMANTIC ERROR (%d): Cannot assign to an expression that is not a variable",
-                variable.getLine(), leftExpressionAST.getData().toString());
+            if (!NodeKind.isVariable(leftKind)) {
+                String message = String.format(
+                        "SEMANTIC ERROR (%d): Cannot assign to an expression that is not a variable",
+                        variable.getLine(), leftExpressionAST.getData().toString());
                 semanticError(message);
             }
             if (rightExpressionAST == null) {
@@ -532,7 +533,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             }
 
             // Expressão Primária de Array em ambos os lados
-            if (leftExpressionAST.getType() == Type.ARRAY_TYPE && rightExpressionAST.getType() == Type.ARRAY_TYPE ) {
+            if (leftExpressionAST.getType() == Type.ARRAY_TYPE && rightExpressionAST.getType() == Type.ARRAY_TYPE) {
                 VariableData leftArrayData = (VariableData) leftExpressionAST.getData();
                 if (!vt.varExists(leftArrayData.getIndex())) { // Variável inexistente
                     String message = String.format("SEMANTIC ERROR (%d): Variable not declared", variable.getLine());
@@ -546,7 +547,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 }
                 Type RightArrayVariableType = vt.getSubType(rightArrayData.getIndex());
                 checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), LeftArrayVariableType,
-                RightArrayVariableType);
+                        RightArrayVariableType);
 
                 assignNode.addChildren(leftExpressionAST); // Array no lado esquerdo, setDados
                 assignNode.addChildren(rightExpressionAST);
@@ -554,7 +555,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             }
 
             // Expressão Primária de Array na Esquerda
-            if (leftExpressionAST.getType() == Type.ARRAY_TYPE) { 
+            if (leftExpressionAST.getType() == Type.ARRAY_TYPE) {
                 VariableData arrayData = (VariableData) leftExpressionAST.getData();
                 if (!vt.varExists(arrayData.getIndex())) { // Variável inexistente
                     String message = String.format("SEMANTIC ERROR (%d): Variable not declared", variable.getLine());
@@ -562,18 +563,18 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 }
                 Type ArrayVariableType = vt.getSubType(arrayData.getIndex());
                 checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), ArrayVariableType,
-                rightExpressionAST.getType());
+                        rightExpressionAST.getType());
 
                 assignNode.addChildren(leftExpressionAST); // Array no lado esquerdo, setDados
                 assignNode.addChildren(rightExpressionAST);
                 assignmentListNode.addChildren(assignNode);
 
-            // Expressão Primária de Array na Direita
+                // Expressão Primária de Array na Direita
             } else if (rightExpressionAST.getType() == Type.ARRAY_TYPE) {
                 VariableData arrayData = (VariableData) rightExpressionAST.getData();
                 Type ArrayVariableType = vt.getSubType(arrayData.getIndex());
                 checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), ArrayVariableType,
-                leftExpressionAST.getType());
+                        leftExpressionAST.getType());
 
                 assignNode.addChildren(leftExpressionAST); // Array na direita, getDados
                 assignNode.addChildren(rightExpressionAST);
@@ -581,9 +582,9 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             } else {
                 // Não é array!
                 AST VariableAST = checkVar(variable);
-                if(VariableAST.getKind() != NodeKind.VAR_DECL_NODE || VariableAST.getKind() != NodeKind.VAR_USE_NODE ) {
+                if (VariableAST.getKind() != NodeKind.VAR_DECL_NODE || VariableAST.getKind() != NodeKind.VAR_USE_NODE) {
                     String message = String.format("SEMANTIC ERROR (%d): Left expression should be a Variable",
-                    ctx.getStart().getLine());
+                            ctx.getStart().getLine());
                     semanticError(message);
                 }
                 checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), VariableAST.getType(),
@@ -599,25 +600,9 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
      * <----------------- Operadores do Expression ----------------->
      */
 
-    // @Override
-    // public AST visitPrimaryExpr(PrimaryExprContext ctx) {
-    //     AST primaryExpr = new AST(NodeKind.PRIMARY_EXPRESSION_NODE, new EmptyData(), Type.NO_TYPE);
-    //     AST operand = visit(ctx.operand());
-    //     primaryExpr.addChildren(operand);
-    //     if (ctx.primaryExpr() != null) {
-    //         if (ctx.primaryExpr().index() != null) {
-    //             AST index = visit(ctx.primaryExpr().index());
-    //             primaryExpr.addChildren(index);
-    //             return primaryExpr;
-    //         }
-    //     }
-
-    //     return primaryExpr;
-    // }
-
     @Override
     public AST visitVisitPrimaryExprComposta(final VisitPrimaryExprCompostaContext ctx) {
-        if( ctx.index() != null) { // Para o caso de acesso à espaço de um array
+        if (ctx.index() != null) { // Para o caso de acesso à espaço de um array
             AST index = visit(ctx.index());
             AST primaryExprNode = visit(ctx.primaryExpr());
             if (primaryExprNode.getType() == Type.ARRAY_TYPE) {
@@ -632,7 +617,6 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             return this.visit(ctx);
         }
     }
-
 
     @Override
     public AST visitOperand(OperandContext ctx) {
@@ -652,20 +636,20 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         return null;
     }
 
-
     @Override
     public AST visitAddOp(AddOpContext ctx) {
 
         AST l = this.visit(ctx.expression(0));
         AST r = this.visit(ctx.expression(1));
+        Token addOpToken = ctx.add_op;
+
         Type lType = l.getType();
         Type rType = r.getType();
-        Token addOpToken = ctx.add_op;
-        if(lType == Type.ARRAY_TYPE) {
+        if (lType == Type.ARRAY_TYPE) {
             VariableData varData = (VariableData) l.getData();
             lType = vt.getSubType(varData.getIndex());
         }
-        if(rType == Type.ARRAY_TYPE) {
+        if (rType == Type.ARRAY_TYPE) {
             VariableData varData = (VariableData) r.getData();
             rType = vt.getSubType(varData.getIndex());
         }
@@ -683,9 +667,22 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         AST r = this.visit(ctx.expression(1));
 
         Token mulOpToken = ctx.mul_op;
-        checkTypeError(mulOpToken.getLine(), mulOpToken.getText(), l.getType(), r.getType());
 
-        return AST.newSubtree(NodeKind.fromValue(mulOpToken.getText()), l.getType(), l, r);
+        Type lType = l.getType();
+        Type rType = r.getType();
+
+        if (lType == Type.ARRAY_TYPE) {
+            VariableData varData = (VariableData) l.getData();
+            lType = vt.getSubType(varData.getIndex());
+        }
+        if (rType == Type.ARRAY_TYPE) {
+            VariableData varData = (VariableData) r.getData();
+            rType = vt.getSubType(varData.getIndex());
+        }
+
+        checkTypeError(mulOpToken.getLine(), mulOpToken.getText(), lType, rType);
+
+        return AST.newSubtree(NodeKind.fromValue(mulOpToken.getText()), lType, l, r);
 
     }
 
@@ -696,7 +693,18 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         AST r = this.visit(ctx.expression(1));
 
         Token relOpToken = ctx.rel_op;
-        checkTypeError(relOpToken.getLine(), relOpToken.getText(), l.getType(), r.getType());
+        Type lType = l.getType();
+        Type rType = r.getType();
+
+        if (lType == Type.ARRAY_TYPE) {
+            VariableData varData = (VariableData) l.getData();
+            lType = vt.getSubType(varData.getIndex());
+        }
+        if (rType == Type.ARRAY_TYPE) {
+            VariableData varData = (VariableData) r.getData();
+            rType = vt.getSubType(varData.getIndex());
+        }
+        checkTypeError(relOpToken.getLine(), relOpToken.getText(), lType, rType);
 
         return AST.newSubtree(NodeKind.fromValue(relOpToken.getText()), Type.BOOL_TYPE, l, r);
 
@@ -860,7 +868,6 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     @Override
     public AST visitCompositeLit(CompositeLitContext ctx) {
         AST type = this.visit(ctx.literalType());
-
 
         return AST.newSubtree(NodeKind.ASSIGN_NODE, Type.NO_TYPE, type);
     }

@@ -1,7 +1,5 @@
 package arrays
 
-import "fmt"
-
 func testeArrays() {
 
 	var a [2]string
@@ -28,4 +26,7 @@ func testeArrays() {
 	e[0] = trueVar
 	e[1] = true
 	falseVar = e[1]
+
+
+	var somaFloat = c[0]+ c[1]
 }
