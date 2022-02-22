@@ -15,4 +15,9 @@ public class IntData implements Data {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return this.data.toString();
+    }
+
 }

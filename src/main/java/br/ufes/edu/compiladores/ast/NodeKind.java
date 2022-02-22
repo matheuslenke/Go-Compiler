@@ -33,7 +33,9 @@ public enum NodeKind {
     VAR_USE_NODE("var_use"),
     VAR_LIST_NODE("var_list"),
     EXPRESSION_LIST_NODE("expression_list"),
+    PRIMARY_EXPRESSION_NODE("primary_expression"),
     FUNC_DECL_NODE("func_decl"),
+    FUNC_USE_NODE("func_use"),
     DECLARATION("declaration"),
     IDENTIFIER_LIST_NODE("identifier_list"),
     IDENTIFIER("identifier"),
@@ -53,6 +55,8 @@ public enum NodeKind {
     ARRAY_TYPE("array_type"),
     ARRAY_LENGTH_NODE("array_length"), 
     ARRAY_ELEMENT_TYPE_NODE("element_type"),
+    ARRAY_USE_NODE("array_use"),
+    INDEX_NODE("index"),
     STRUCT_TYPE("struct_type"),
     FUNCTION_TYPE("function_type"),
     INTERFACE_TYPE("interface_type"),
@@ -98,6 +102,20 @@ public enum NodeKind {
             case STR_VAL_NODE:
             case VAR_DECL_NODE:
             case VAR_USE_NODE:
+            case ARRAY_USE_NODE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isVariable(NodeKind kind) {
+        switch (kind) {
+            case VAR_DECL_NODE:
+            case VAR_USE_NODE:
+            case ARRAY_USE_NODE:
+            case VAR_LIST_NODE:
+            case ARRAY_TYPE:
                 return true;
             default:
                 return false;

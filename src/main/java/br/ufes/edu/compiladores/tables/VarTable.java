@@ -21,8 +21,22 @@ public final class VarTable {
         return -1;
     }
 
+    public Boolean varExists(Integer i) {
+        Entry e = table.get(i);
+        if (e == null) {
+            return false;
+        }
+        return true;
+    }
+
     public int addVar(String s, int line, Type type) {
         Entry entry = new Entry(s, line, type);
+        int idxAdded = table.size();
+        table.add(entry);
+        return idxAdded;
+    }
+    public int addVar(String s, int line, Type type, Type subType) {
+        Entry entry = new Entry(s, line, type, subType);
         int idxAdded = table.size();
         table.add(entry);
         return idxAdded;
@@ -40,13 +54,23 @@ public final class VarTable {
         return table.get(i).type;
     }
 
+    public Type getSubType(int i) {
+        return table.get(i).subType;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
         f.format("Variables table:\n");
         for (int i = 0; i < table.size(); i++) {
-            f.format("Entry %d -- name: %s, line: %d, type: %s\n", i,
-                    getName(i), getLine(i), getType(i).toString());
+            if(getType(i) == Type.ARRAY_TYPE) {
+                f.format("Entry %d -- name: %s, line: %d, type: %s, subtype: %s\n", i,
+                        getName(i), getLine(i), getType(i).toString(), getSubType(i).toString());
+            } else {
+                f.format("Entry %d -- name: %s, line: %d, type: %s\n", i,
+                        getName(i), getLine(i), getType(i).toString());
+
+            }
         }
         f.close();
         return sb.toString();
@@ -56,11 +80,19 @@ public final class VarTable {
         private final String name;
         private final int line;
         private final Type type;
+        private Type subType;
 
         Entry(String name, int line, Type type) {
             this.name = name;
             this.line = line;
             this.type = type;
+        }
+
+        Entry(String name, int line, Type type, Type subType) {
+            this.name = name;
+            this.line = line;
+            this.type = type;
+            this.subType = subType;
         }
     }
 }

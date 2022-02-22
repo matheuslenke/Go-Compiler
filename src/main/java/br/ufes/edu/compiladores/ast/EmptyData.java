@@ -8,4 +8,10 @@ public class EmptyData implements Data {
     public void setIndex(Integer index) {
         throw new Error("Empty data cannot set index");
     }
+
+    @Override
+    public String toString() {
+        return "nil data";
+    }
+
 }

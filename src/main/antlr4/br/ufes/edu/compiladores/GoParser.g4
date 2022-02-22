@@ -266,16 +266,16 @@ expression:
     ;
 
 primaryExpr:
-	operand
-	| conversion
-	| methodExpr
+	operand #visitOperand
+	| conversion #visitConversion
+	| methodExpr #visitMethodExpr
 	| primaryExpr (
 		(DOT IDENTIFIER)
-		| index
+		| index 
 		| slice_
 		| typeAssertion
 		| arguments
-	);
+	) #visitPrimaryExprComposta;
 
 unaryExpr:
 	primaryExpr

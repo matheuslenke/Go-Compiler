@@ -15,4 +15,9 @@ public class BoolData implements Data {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return Boolean.toString(this.data);
+    }
+
 }

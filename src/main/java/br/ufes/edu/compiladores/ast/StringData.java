@@ -15,4 +15,9 @@ public class StringData implements Data {
         this.index = index;
     }
 
+    @Override
+    public String toString() {
+        return this.index.toString();
+    }
+
 }

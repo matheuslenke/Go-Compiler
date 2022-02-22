@@ -15,4 +15,9 @@ public class RealData implements Data {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return Double.toString(this.data);
+    }
+
 }

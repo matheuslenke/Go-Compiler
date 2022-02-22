@@ -80,8 +80,8 @@ public class AST {
 		if (this.type != Type.NO_TYPE) {
 			System.err.printf("(%s) ", this.type.toString());
 		}
-		if (this.kind == NodeKind.FUNC_DECL_NODE || this.kind == NodeKind.VAR_DECL_NODE
-				|| this.kind == NodeKind.VAR_USE_NODE) {
+		if ((this.kind == NodeKind.FUNC_DECL_NODE || this.kind == NodeKind.VAR_DECL_NODE
+				|| this.kind == NodeKind.VAR_USE_NODE)) {
 			VariableData varData = (VariableData) this.data;
 			System.err.printf("%s@%d", vt.getName(varData.getIndex()), varData.getIndex());
 		} else {

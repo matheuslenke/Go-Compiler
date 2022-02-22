@@ -1,6 +1,9 @@
 package br.ufes.edu.compiladores;
 
 import java.io.IOException;
+import java.util.Arrays;
+
+import org.antlr.v4.gui.TreeViewer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;

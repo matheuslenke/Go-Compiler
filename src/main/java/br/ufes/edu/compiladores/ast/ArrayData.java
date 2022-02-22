@@ -5,8 +5,14 @@ import java.util.ArrayList;
 public class ArrayData implements Data {
     ArrayList<Object> list = new ArrayList<>();
     Integer size = 0;
+    Integer index;
 
-    public ArrayData(Integer size) {
+    public ArrayData(Integer index) {
+        this.index = index;
+    }
+
+    public ArrayData(Integer index, Integer size) {
+        this.index = index;
         this.size = size;
     }
 
@@ -24,5 +30,10 @@ public class ArrayData implements Data {
 
     public void setSize(Integer size) {
         this.size = size;
+    }
+
+    @Override
+    public String toString() {
+        return this.index.toString();
     }
 }
