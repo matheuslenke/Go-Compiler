@@ -8,10 +8,9 @@ func testeArrays() {
 	var d [2]float64
 	var e [2]bool
 
-
 	var IntVar int = 2
 	b[0] = IntVar
-	IntVar = b[0];
+	IntVar = b[0]
 
 	var float32Var float32 = 5.0
 	c[0] = float32Var
@@ -27,6 +26,7 @@ func testeArrays() {
 	e[1] = true
 	falseVar = e[1]
 
-
-	var somaFloat = c[0]+ c[1]
+	var addFloat = c[0] + c[1]
+	var mulFloat = c[0] * c[1]
+	var relFloat = c[0] < c[1]
 }
