@@ -1,21 +1,22 @@
 package br.ufes.edu.compiladores.tables;
 
+import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * Classe para registro da tabela de strings para uso posterior
  */
 public final class StrTable {
-    private Map<Integer, String> table = new HashMap<>();
-    private Integer index = 0;
+    private List<String> table = new ArrayList<>();
 
     public Integer add(String s) {
-        Integer current = index;
-        this.table.putIfAbsent(current, s);
-        index += 1;
-        return current;
+        int idxAdded = table.indexOf(s);
+        if (idxAdded == -1) {
+            idxAdded = table.size();
+            table.add(s);
+        }
+        return idxAdded;
     }
 
     public String get(Integer i) {
@@ -27,9 +28,9 @@ public final class StrTable {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
         f.format("Strings table:%n");
-
-        table.forEach((k, v) -> f.format("Entry %d: %s%n", k, v));
-
+        for (int i = 0; i < table.size(); i++) {
+            f.format("Entry %d: %s%n", i, table.get(i));
+        }
         f.close();
         return sb.toString();
     }

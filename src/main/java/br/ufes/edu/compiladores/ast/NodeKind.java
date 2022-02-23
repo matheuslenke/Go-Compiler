@@ -36,6 +36,7 @@ public enum NodeKind {
     PRIMARY_EXPRESSION_NODE("primary_expression"),
     FUNC_DECL_NODE("func_decl"),
     FUNC_USE_NODE("func_use"),
+    ARGUMENTS_NODE("arguments"),
     DECLARATION("declaration"),
     IDENTIFIER_LIST_NODE("identifier_list"),
     IDENTIFIER("identifier"),
