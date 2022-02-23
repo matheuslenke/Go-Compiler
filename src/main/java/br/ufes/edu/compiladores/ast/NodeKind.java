@@ -13,6 +13,8 @@ public enum NodeKind {
     INT_VAL_NODE("int"),
     LT_NODE("<"),
     GT_NODE(">"),
+    LTE_NODE("<="),
+    GTE_NODE(">="),
     MINUS_NODE("-"),
     OVER_NODE("/"),
     PLUS_NODE("+"),

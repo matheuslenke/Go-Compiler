@@ -1,6 +1,7 @@
 package br.ufes.edu.compiladores.checker;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -212,7 +213,38 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                     lineNo, quantReturnStmt, quantSignature));
             System.exit(1);
         }
+    }
 
+    private void checkParametersTypeFromFunctionCall(final AST funcAST, final AST var) {
+        for(AST child : funcAST.getChildren()) {
+            if(child.getKind() == NodeKind.PARAMETERS_NODE) {
+                Integer totalParameters = child.getChildren().size();
+                Integer totalArguments = var.getChildren().size();
+                if( totalParameters != totalArguments) {
+                    final String message = String.format(
+                        "SEMANTIC ERROR (%d): Wrong number of arguments from function call expected (%d) but got (%d)",
+                        0, totalParameters, totalArguments);
+                    semanticError(message);
+                }
+
+                for(int i = 0; i< totalArguments; i++) {
+                    Optional<AST> ParameterNodeOpt = child.getChild(i);
+                    Optional<AST> argumentNodeOpt = var.getChild(i);
+                    if(ParameterNodeOpt.isPresent() && argumentNodeOpt.isPresent()) {
+                        AST parameterNode = ParameterNodeOpt.get();
+                        AST argumentNode = argumentNodeOpt.get();
+
+                        if(parameterNode.getType() != argumentNode.getType()) {
+                            final String message = String.format(
+                                "SEMANTIC ERROR (%d): Wrong type of argument from function call. Expected (%s) but got (%s)",
+                                0, parameterNode.getType().toString(), argumentNode.getType().toString());
+                            semanticError(message);
+                        }
+                    }
+                }
+
+            }
+        }
     }
 
     // ----------------------------------------------------------------------------
@@ -283,6 +315,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
             decl.addChildren(block);
         }
+
+        vt.setAstNode(varData.getIndex(), decl);
 
         vt.closeScope();
         return decl;
@@ -619,6 +653,11 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             final AST functionAST = this.visit(ctx.primaryExpr());
             final AST argumentsAST = this.visit(ctx.arguments());
 
+            VariableData funcVarData = (VariableData) functionAST.getData(); 
+            AST functionDeclNode = vt.getAstNode(funcVarData.getIndex());
+
+            checkParametersTypeFromFunctionCall(functionDeclNode, argumentsAST);
+
             final AST functionUseNode = AST.newSubtree(NodeKind.FUNC_USE_NODE, Type.NO_TYPE, functionAST, argumentsAST);
 
             return functionUseNode;
@@ -730,6 +769,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         checkTypeError(relOpToken.getLine(), relOpToken.getText(), lType, rType);
 
         lastDeclType = Type.BOOL_TYPE;
+        String test = relOpToken.getText();
         return AST.newSubtree(NodeKind.fromValue(relOpToken.getText()), Type.BOOL_TYPE, l, r);
 
     }

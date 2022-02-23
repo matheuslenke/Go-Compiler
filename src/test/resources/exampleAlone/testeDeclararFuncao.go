@@ -10,15 +10,14 @@ func func1() {
 
 func func2() string {
 	func1()
-	var s2 string = "func1"
-	fmt.Println(s2)
+	var s string = "func1"
+	fmt.Println(s)
 
-	return s2
+	return s
 }
 
-
 func func3(a, b string) (string, string) {
-	func1()
+	// var resultF1 string = func2()
 	var s3, s4 string = "func1", "Hello world" + "t"
 	return s3, s4
 }

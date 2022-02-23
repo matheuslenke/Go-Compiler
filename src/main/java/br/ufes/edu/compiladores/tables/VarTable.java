@@ -3,6 +3,8 @@ package br.ufes.edu.compiladores.tables;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
+
+import br.ufes.edu.compiladores.ast.AST;
 import br.ufes.edu.compiladores.typing.Type;
 
 /**
@@ -75,6 +77,14 @@ public final class VarTable {
         return table.get(i).subType;
     }
 
+    public AST getAstNode(int i) {
+        return table.get(i).node;
+    }
+
+    public void setAstNode(int i, AST node) {
+        table.get(i).setNode(node);
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
@@ -95,6 +105,7 @@ public final class VarTable {
 
     public static final class Entry {
         private final String name;
+        private AST node;
         private final int line;
         private final Type type;
         private final Type subType;
@@ -106,14 +117,29 @@ public final class VarTable {
             this.type = type;
             this.scopeName = scopeName;
             this.subType = null;
+            this.node = null;
         }
-
+        
         Entry(String name, int line, Type type, String scopeName, Type subType) {
             this.name = name;
             this.line = line;
             this.type = type;
             this.scopeName = scopeName;
             this.subType = subType;
+            this.node = null;
         }
-    }
+
+        Entry(String name, int line, Type type, String scopeName, AST node) {
+            this.name = name;
+            this.line = line;
+            this.type = type;
+            this.scopeName = scopeName;
+            this.subType = null;
+            this.node = node;
+        }
+
+        public void setNode(AST node) {
+            this.node = node;
+        }
+    } 
 }
