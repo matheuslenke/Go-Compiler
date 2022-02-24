@@ -56,7 +56,7 @@ public class AST {
 	public Optional<AST> getChild(int idx) {
 
 		Integer listSize = this.children.size();
-		if (idx > 0 && idx < listSize) {
+		if (idx >= 0 && idx < listSize) {
 			return Optional.of(this.children.get(idx));
 		}
 

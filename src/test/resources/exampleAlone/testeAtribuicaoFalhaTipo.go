@@ -9,7 +9,7 @@ func TesteAtribuicaoFalhaTipo() {
 	var numero int = 300
 
 	fmt.Println(numero)
-	numero = e
-	fmt.Println(numero)
+	// numero = e
+	// fmt.Println(numero)
 
 }

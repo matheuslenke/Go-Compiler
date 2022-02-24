@@ -186,9 +186,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     }
 
     private void checkReturnCorrect(final int lineNo, final AST result, final AST block) {
-
         final AST returnBlock = block.getChildren().get(block.getChildren().size() - 1);
-
         int quantSignature = 0;
 
         if (result != null) {
@@ -233,8 +231,16 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                     if(ParameterNodeOpt.isPresent() && argumentNodeOpt.isPresent()) {
                         AST parameterNode = ParameterNodeOpt.get();
                         AST argumentNode = argumentNodeOpt.get();
+                        
+                        Type paramType = parameterNode.getType();
+                        Type argumentType = argumentNode.getType();
+                        
+                        if(argumentNode.getType() == Type.ARRAY_TYPE) {
+                            VariableData argumentVarData = (VariableData) argumentNode.getData();
+                            argumentType = vt.getSubType(argumentVarData.getIndex());
+                        }
 
-                        if(parameterNode.getType() != argumentNode.getType()) {
+                        if(paramType != argumentType) {
                             final String message = String.format(
                                 "SEMANTIC ERROR (%d): Wrong type of argument from function call. Expected (%s) but got (%s)",
                                 0, parameterNode.getType().toString(), argumentNode.getType().toString());
@@ -247,7 +253,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
     }
 
-    private void checkReturnTypeFromFunctionCall(Integer line, final AST leftExpressionAST, final AST functionUseAST) {
+    private void checkReturnTypeFromFunctionCall(Integer index, Integer line, final AST leftExpressionAST, final AST functionUseAST) {
         for (AST funcChild : functionUseAST.getChildren()) {
             if(funcChild.getKind() == NodeKind.VAR_USE_NODE) {
                 VariableData funcVarData = (VariableData) funcChild.getData(); 
@@ -255,15 +261,25 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
                 for (AST functionDeclChild : functionAST.getChildren()) {
                     if (functionDeclChild.getKind() == NodeKind.RESULT_NODE) {
+                        Optional<AST> resultOpt = functionDeclChild.getChild(index);
+                        if (resultOpt.isPresent()) {
+                            AST result = resultOpt.get();
+                            Type resultType = result.getType();
+                            Type varType = leftExpressionAST.getType();
 
-                        for(AST Result : functionDeclChild.getChildren()) {
-                            if(Result.getType() != leftExpressionAST.getType()) {
+                            if(varType == Type.ARRAY_TYPE) {
+                                VariableData varData = (VariableData) leftExpressionAST.getData();
+                                varType = vt.getSubType(varData.getIndex());
+                            }
+                            
+
+                            if(resultType != varType) {
                                 final String message = String.format(
                                 "SEMANTIC ERROR (%d): Wrong type of return, expected (%s) but got (%s)",
-                                0, Result.getType().toString(), leftExpressionAST.getType().toString());
+                                0, resultType.toString(), varType);
                                 semanticError(message);
                             }
-                        }
+                        } 
                     }
                 }
             }
@@ -387,7 +403,14 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         if (ctx.parameters() != null) {
             final AST parameters = this.visit(ctx.parameters());
             if (parameters != null) {
-
+                Integer resultSize = parameters.getChildren().size();
+                if (resultSize > 1) {
+                    Integer line = ctx.parameters().L_PAREN().getSymbol().getLine();
+                    final String message = String.format(
+                        "SEMANTIC ERROR (%d): Cannot have more than one return but got (%d)",
+                        line, resultSize);
+                    semanticError(message);
+                }
                 final AST[] children = new AST[result.getChildren().size()];
                 result.addChildren(parameters.getChildren().toArray(children));
                 return result;
@@ -557,7 +580,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         return variableDeclaration;
     }
 
-    public void visitArrayAssignment(Integer line, AST assignNode, AST assignmentListNode, AST leftExpressionAST, AST rightExpressionAST) {
+    public void visitArrayAssignment(Integer index, Integer line, AST assignNode, AST assignmentListNode, AST leftExpressionAST, AST rightExpressionAST) {
         if (leftExpressionAST.getType() == Type.ARRAY_TYPE && rightExpressionAST.getType() == Type.ARRAY_TYPE) {
             final VariableData leftArrayData = (VariableData) leftExpressionAST.getData();
             if (!vt.varExists(leftArrayData.getIndex())) { // Variável inexistente
@@ -573,6 +596,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 semanticError(message);
             }
             final Type RightArrayVariableType = vt.getSubType(rightArrayData.getIndex());
+
             checkTypeError(line, NodeKind.ASSIGN_NODE.toString(), LeftArrayVariableType,
                     RightArrayVariableType);
 
@@ -582,7 +606,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
 
         // Expressão Primária de Array na Esquerda
-        if (leftExpressionAST.getType() == Type.ARRAY_TYPE) {
+        else if (leftExpressionAST.getType() == Type.ARRAY_TYPE) {
             final VariableData arrayData = (VariableData) leftExpressionAST.getData();
             if (!vt.varExists(arrayData.getIndex())) { // Variável inexistente
                 final String message = String.format("SEMANTIC ERROR (%d): Variable not declared",
@@ -590,9 +614,11 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 semanticError(message);
             }
             final Type ArrayVariableType = vt.getSubType(arrayData.getIndex());
-            checkTypeError(line, NodeKind.ASSIGN_NODE.toString(), ArrayVariableType,
-                    rightExpressionAST.getType());
-
+            if (rightExpressionAST.getKind() == NodeKind.FUNC_USE_NODE) {
+                checkReturnTypeFromFunctionCall(index, line, leftExpressionAST, rightExpressionAST);
+            } else {
+                checkTypeError(line, NodeKind.ASSIGN_NODE.toString(), ArrayVariableType, rightExpressionAST.getType());
+            }
             assignNode.addChildren(leftExpressionAST); // Array no lado esquerdo, setDados
             assignNode.addChildren(rightExpressionAST);
             assignmentListNode.addChildren(assignNode);
@@ -625,24 +651,24 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
     }
 
-    public void visitVariableAssignment(Token variable, AST leftExpressionAST, AST rightExpressionAST, AST assignNode, AST assignmentListNode) {
+    public void visitVariableAssignment(Integer index, Token variable, AST leftExpressionAST, AST rightExpressionAST, AST assignNode, AST assignmentListNode) {
         final AST VariableAST = checkVar(variable);
         if (VariableAST.getKind() != NodeKind.VAR_DECL_NODE && VariableAST.getKind() != NodeKind.VAR_USE_NODE) {
             final String message = String.format("SEMANTIC ERROR (%d): Left expression should be a Variable",
                     variable.getLine());
             semanticError(message);
         }
-        
-        if(rightExpressionAST.getKind() == NodeKind.FUNC_USE_NODE) {
-            checkReturnTypeFromFunctionCall(variable.getLine(), leftExpressionAST, rightExpressionAST);
-            assignNode.addChildren(VariableAST, rightExpressionAST);
-            assignmentListNode.addChildren(assignNode);
-        } else {
-            checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), VariableAST.getType(),
-                    rightExpressionAST.getType());
-            assignNode.addChildren(VariableAST, rightExpressionAST);
-            assignmentListNode.addChildren(assignNode);
-        }
+        checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), VariableAST.getType(),
+                rightExpressionAST.getType());
+        assignNode.addChildren(VariableAST, rightExpressionAST);
+        assignmentListNode.addChildren(assignNode);
+    }
+
+    public void visitVariableAssigmentWithFunctionReturn(Integer index, Token variable, AST leftExpressionAST, AST rightExpressionAST, AST assignNode, AST assignmentListNode) {
+        final AST VariableAST = checkVar(variable);
+        checkReturnTypeFromFunctionCall(index, variable.getLine(), leftExpressionAST, rightExpressionAST);
+        assignNode.addChildren(VariableAST, rightExpressionAST);
+        assignmentListNode.addChildren(assignNode);
     }
 
     /**
@@ -655,24 +681,27 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         final int quantExpressionLeft = ctx.expressionList(0).expression().size();
         final int quantExpressionRight = ctx.expressionList(1).expression().size();
         checkWrongAssignCount(ctx.start.getLine(), quantExpressionLeft, quantExpressionRight);
-
+        
         for (int i = 0; i < quantExpressionLeft; i++) {
             final AST assignNode = new AST(NodeKind.ASSIGN_NODE, new EmptyData(), Type.NO_TYPE);
-
+            
             final AST leftExpressionAST = this.visit(ctx.expressionList(0).expression(i));
             final ExpressionContext value = ctx.expressionList(1).expression(i);
             final AST rightExpressionAST = this.visit(value);
             final Token variable = ctx.expressionList(0).expression(i).getStop();
-
+            
             // Verificações de atribuição
             this.verifyAssignConstraints(variable.getLine(), leftExpressionAST, rightExpressionAST);
-
+            
             // Tem que lidar com Arrays de alguma forma
             if (leftExpressionAST.getType() == Type.ARRAY_TYPE || rightExpressionAST.getType() == Type.ARRAY_TYPE) {
-                this.visitArrayAssignment(variable.getLine(), assignNode, assignmentListNode, leftExpressionAST, rightExpressionAST);
-            }  else { 
-                // Não tem array!
-                this.visitVariableAssignment(variable, leftExpressionAST, rightExpressionAST, assignNode, assignmentListNode);
+                this.visitArrayAssignment(i, variable.getLine(), assignNode, assignmentListNode, leftExpressionAST, rightExpressionAST);
+            }  else if(rightExpressionAST.getKind() == NodeKind.FUNC_USE_NODE) { 
+                // Não tem array mas tem função!
+                this.visitVariableAssigmentWithFunctionReturn(i, variable, leftExpressionAST, rightExpressionAST, assignNode, assignmentListNode);
+            } else {
+                // Somente variáveis base
+                this.visitVariableAssignment(i, variable, leftExpressionAST, rightExpressionAST, assignNode, assignmentListNode);
             }
         }
         return assignmentListNode;
