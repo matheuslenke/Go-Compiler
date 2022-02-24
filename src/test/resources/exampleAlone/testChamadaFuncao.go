@@ -19,6 +19,6 @@ func funcao2() {
 	var a int = 1
 	var b int = 2
 	var c float32 = 5.5
-	var result int
+	var result float32
 	result = somaDoisNumeros(a, b)
 }

@@ -635,6 +635,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         
         if(rightExpressionAST.getKind() == NodeKind.FUNC_USE_NODE) {
             checkReturnTypeFromFunctionCall(variable.getLine(), leftExpressionAST, rightExpressionAST);
+            assignNode.addChildren(VariableAST, rightExpressionAST);
+            assignmentListNode.addChildren(assignNode);
         } else {
             checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), VariableAST.getType(),
                     rightExpressionAST.getType());
