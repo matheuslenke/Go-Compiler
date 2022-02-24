@@ -1,0 +1,47 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< br.ufes.edu.compiladores:go-compiler >----------------
+[INFO] Building Compilador de GO 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ go-compiler ---
+PARSE SUCCESSFUL
+
+
+
+Strings table:
+Entry 0: func1
+Entry 1: Hello world
+Entry 2: t
+
+
+
+
+Variables table:
+Entry 0 -- name: fmt, line: 3, type: no_type, scopeName: global
+Entry 1 -- name: Println, line: 3, type: no_type, scopeName: global
+Entry 2 -- name: arg, line: 3, type: string, scopeName: Println
+Entry 3 -- name: Scanln, line: 3, type: no_type, scopeName: global
+Entry 4 -- name: arg, line: 3, type: string, scopeName: Scanln
+Entry 5 -- name: func1, line: 5, type: func, scopeName: global
+Entry 6 -- name: s, line: 6, type: string, scopeName: func1
+Entry 7 -- name: func2, line: 11, type: func, scopeName: global
+Entry 8 -- name: s, line: 13, type: string, scopeName: func2
+Entry 9 -- name: func3, line: 19, type: func, scopeName: global
+Entry 10 -- name: a, line: 19, type: string, scopeName: func3
+Entry 11 -- name: b, line: 19, type: string, scopeName: func3
+Entry 12 -- name: s3, line: 21, type: string, scopeName: func3
+Entry 13 -- name: s4, line: 21, type: string, scopeName: func3
+Entry 14 -- name: returnVar, line: 23, type: int, scopeName: func3
+Entry 15 -- name: func4, line: 27, type: func, scopeName: global
+Entry 16 -- name: s5, line: 28, type: int, scopeName: func4
+
+
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.850 s
+[INFO] Finished at: 2022-02-24T20:53:48-03:00
+[INFO] ------------------------------------------------------------------------

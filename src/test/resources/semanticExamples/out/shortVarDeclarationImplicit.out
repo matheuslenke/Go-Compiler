@@ -1,0 +1,46 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< br.ufes.edu.compiladores:go-compiler >----------------
+[INFO] Building Compilador de GO 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ go-compiler ---
+PARSE SUCCESSFUL
+
+
+
+Strings table:
+Entry 0: Hello World
+Entry 1: Bye World
+
+
+
+
+Variables table:
+Entry 0 -- name: fmt, line: 3, type: no_type, scopeName: global
+Entry 1 -- name: Println, line: 3, type: no_type, scopeName: global
+Entry 2 -- name: arg, line: 3, type: string, scopeName: Println
+Entry 3 -- name: Scanln, line: 3, type: no_type, scopeName: global
+Entry 4 -- name: arg, line: 3, type: string, scopeName: Scanln
+Entry 5 -- name: testeAtribuicaoImplicitaCurta, line: 5, type: func, scopeName: global
+Entry 6 -- name: a, line: 6, type: int, scopeName: testeAtribuicaoImplicitaCurta
+Entry 7 -- name: b, line: 7, type: float, scopeName: testeAtribuicaoImplicitaCurta
+Entry 8 -- name: c, line: 8, type: string, scopeName: testeAtribuicaoImplicitaCurta
+Entry 9 -- name: d, line: 9, type: bool, scopeName: testeAtribuicaoImplicitaCurta
+Entry 10 -- name: e, line: 10, type: bool, scopeName: testeAtribuicaoImplicitaCurta
+Entry 11 -- name: f, line: 12, type: int, scopeName: testeAtribuicaoImplicitaCurta
+Entry 12 -- name: g, line: 12, type: int, scopeName: testeAtribuicaoImplicitaCurta
+Entry 13 -- name: h, line: 13, type: float, scopeName: testeAtribuicaoImplicitaCurta
+Entry 14 -- name: i, line: 13, type: bool, scopeName: testeAtribuicaoImplicitaCurta
+Entry 15 -- name: j, line: 14, type: bool, scopeName: testeAtribuicaoImplicitaCurta
+Entry 16 -- name: k, line: 14, type: string, scopeName: testeAtribuicaoImplicitaCurta
+
+
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.710 s
+[INFO] Finished at: 2022-02-24T20:53:58-03:00
+[INFO] ------------------------------------------------------------------------

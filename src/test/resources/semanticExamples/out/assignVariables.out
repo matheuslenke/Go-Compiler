@@ -1,0 +1,37 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< br.ufes.edu.compiladores:go-compiler >----------------
+[INFO] Building Compilador de GO 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ go-compiler ---
+PARSE SUCCESSFUL
+
+
+
+Strings table:
+
+
+
+
+Variables table:
+Entry 0 -- name: fmt, line: 3, type: no_type, scopeName: global
+Entry 1 -- name: Println, line: 3, type: no_type, scopeName: global
+Entry 2 -- name: arg, line: 3, type: string, scopeName: Println
+Entry 3 -- name: Scanln, line: 3, type: no_type, scopeName: global
+Entry 4 -- name: arg, line: 3, type: string, scopeName: Scanln
+Entry 5 -- name: testeAtribuicao, line: 7, type: func, scopeName: global
+Entry 6 -- name: e, line: 8, type: int, scopeName: testeAtribuicao
+Entry 7 -- name: numero, line: 9, type: int, scopeName: testeAtribuicao
+Entry 8 -- name: floatVar, line: 12, type: float, scopeName: testeAtribuicao
+Entry 9 -- name: floatVar2, line: 13, type: float, scopeName: testeAtribuicao
+
+
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.745 s
+[INFO] Finished at: 2022-02-24T20:53:42-03:00
+[INFO] ------------------------------------------------------------------------
