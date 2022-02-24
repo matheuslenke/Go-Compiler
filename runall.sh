@@ -12,17 +12,18 @@ ERROROUT=$OUT/withErrors
 rm -rf $OUT
 mkdir $OUT
 mvn compile
-# for infile in `ls $IN/*.go`; do
-#     base=$(basename $infile)
-#     outfile=$OUT/${base/.go/.out}
-#     dotfile=$OUT/${base/.go/.dot}
-#     pdffile=$OUT/${base/.go/.pdf}
-#     echo Running $base
-#     mvn exec:java -Dexec.args="$infile"  1> $outfile 2> $dotfile
-#     dot -Tpdf $dotfile -o $pdffile
-# done
+for infile in `ls $IN/*.go`; do
+    base=$(basename $infile)
+    outfile=$OUT/${base/.go/.out}
+    dotfile=$OUT/${base/.go/.dot}
+    pdffile=$OUT/${base/.go/.pdf}
+    echo Running $base
+    mvn exec:java -Dexec.args="$infile"  1> $outfile 2> $dotfile
+    dot -Tpdf $dotfile -o $pdffile
+done
 
-echo Running with errors
+echo; echo ---Running with errors---; echo
+
 mkdir $ERROROUT
 for infile in `ls $ERRORIN/*.go`; do
     base=$(basename $infile)
