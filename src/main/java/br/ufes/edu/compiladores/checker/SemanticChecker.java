@@ -247,6 +247,29 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         }
     }
 
+    private void checkReturnTypeFromFunctionCall(Integer line, final AST leftExpressionAST, final AST functionUseAST) {
+        for (AST funcChild : functionUseAST.getChildren()) {
+            if(funcChild.getKind() == NodeKind.VAR_USE_NODE) {
+                VariableData funcVarData = (VariableData) funcChild.getData(); 
+                AST functionAST = vt.getAstNode(funcVarData.getIndex());
+
+                for (AST functionDeclChild : functionAST.getChildren()) {
+                    if (functionDeclChild.getKind() == NodeKind.RESULT_NODE) {
+
+                        for(AST Result : functionDeclChild.getChildren()) {
+                            if(Result.getType() != leftExpressionAST.getType()) {
+                                final String message = String.format(
+                                "SEMANTIC ERROR (%d): Wrong type of return, expected (%s) but got (%s)",
+                                0, Result.getType().toString(), leftExpressionAST.getType().toString());
+                                semanticError(message);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // ----------------------------------------------------------------------------
     // Visitadores.
 
@@ -534,6 +557,92 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         return variableDeclaration;
     }
 
+    public void visitArrayAssignment(Integer line, AST assignNode, AST assignmentListNode, AST leftExpressionAST, AST rightExpressionAST) {
+        if (leftExpressionAST.getType() == Type.ARRAY_TYPE && rightExpressionAST.getType() == Type.ARRAY_TYPE) {
+            final VariableData leftArrayData = (VariableData) leftExpressionAST.getData();
+            if (!vt.varExists(leftArrayData.getIndex())) { // Variável inexistente
+                final String message = String.format("SEMANTIC ERROR (%d): Variable not declared",
+                        line);
+                semanticError(message);
+            }
+            final Type LeftArrayVariableType = vt.getSubType(leftArrayData.getIndex());
+            final VariableData rightArrayData = (VariableData) leftExpressionAST.getData();
+            if (!vt.varExists(rightArrayData.getIndex())) { // Variável inexistente
+                final String message = String.format("SEMANTIC ERROR (%d): Variable not declared",
+                        line);
+                semanticError(message);
+            }
+            final Type RightArrayVariableType = vt.getSubType(rightArrayData.getIndex());
+            checkTypeError(line, NodeKind.ASSIGN_NODE.toString(), LeftArrayVariableType,
+                    RightArrayVariableType);
+
+            assignNode.addChildren(leftExpressionAST); // Array no lado esquerdo, setDados
+            assignNode.addChildren(rightExpressionAST);
+            assignmentListNode.addChildren(assignNode);
+        }
+
+        // Expressão Primária de Array na Esquerda
+        if (leftExpressionAST.getType() == Type.ARRAY_TYPE) {
+            final VariableData arrayData = (VariableData) leftExpressionAST.getData();
+            if (!vt.varExists(arrayData.getIndex())) { // Variável inexistente
+                final String message = String.format("SEMANTIC ERROR (%d): Variable not declared",
+                        line);
+                semanticError(message);
+            }
+            final Type ArrayVariableType = vt.getSubType(arrayData.getIndex());
+            checkTypeError(line, NodeKind.ASSIGN_NODE.toString(), ArrayVariableType,
+                    rightExpressionAST.getType());
+
+            assignNode.addChildren(leftExpressionAST); // Array no lado esquerdo, setDados
+            assignNode.addChildren(rightExpressionAST);
+            assignmentListNode.addChildren(assignNode);
+
+            // Expressão Primária de Array na Direita
+        } else if (rightExpressionAST.getType() == Type.ARRAY_TYPE) {
+            final VariableData arrayData = (VariableData) rightExpressionAST.getData();
+            final Type ArrayVariableType = vt.getSubType(arrayData.getIndex());
+            checkTypeError(line, NodeKind.ASSIGN_NODE.toString(), ArrayVariableType,
+                    leftExpressionAST.getType());
+
+            assignNode.addChildren(leftExpressionAST); // Array na direita, getDados
+            assignNode.addChildren(rightExpressionAST);
+            assignmentListNode.addChildren(assignNode);
+        }
+    }
+
+    public void verifyAssignConstraints(Integer line, AST leftExpressionAST, AST rightExpressionAST) {
+        final NodeKind leftKind = leftExpressionAST.getKind();
+        if (!NodeKind.isVariable(leftKind)) {
+            final String message = String.format(
+                    "SEMANTIC ERROR (%d): Cannot assign to an expression that is not a variable",
+                    line, leftExpressionAST.getData().toString());
+            semanticError(message);
+        }
+        if (rightExpressionAST == null) {
+            final String message = String.format("SEMANTIC ERROR (%d): expression invalid",
+                    line);
+            semanticError(message);
+        }
+    }
+
+    public void visitVariableAssignment(Token variable, AST leftExpressionAST, AST rightExpressionAST, AST assignNode, AST assignmentListNode) {
+        final AST VariableAST = checkVar(variable);
+        if (VariableAST.getKind() != NodeKind.VAR_DECL_NODE && VariableAST.getKind() != NodeKind.VAR_USE_NODE) {
+            final String message = String.format("SEMANTIC ERROR (%d): Left expression should be a Variable",
+                    variable.getLine());
+            semanticError(message);
+        }
+        
+        if(rightExpressionAST.getKind() == NodeKind.FUNC_USE_NODE) {
+            checkReturnTypeFromFunctionCall(variable.getLine(), leftExpressionAST, rightExpressionAST);
+        } else {
+            checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), VariableAST.getType(),
+                    rightExpressionAST.getType());
+            assignNode.addChildren(VariableAST, rightExpressionAST);
+            assignmentListNode.addChildren(assignNode);
+        }
+    }
+
     /**
      * Somente verifica atribuições identifier = expression
      */
@@ -554,81 +663,14 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             final Token variable = ctx.expressionList(0).expression(i).getStop();
 
             // Verificações de atribuição
-            final NodeKind leftKind = leftExpressionAST.getKind();
-            if (!NodeKind.isVariable(leftKind)) {
-                final String message = String.format(
-                        "SEMANTIC ERROR (%d): Cannot assign to an expression that is not a variable",
-                        variable.getLine(), leftExpressionAST.getData().toString());
-                semanticError(message);
-            }
-            if (rightExpressionAST == null) {
-                final String message = String.format("SEMANTIC ERROR (%d): expression invalid",
-                        variable.getLine());
-                semanticError(message);
-            }
+            this.verifyAssignConstraints(variable.getLine(), leftExpressionAST, rightExpressionAST);
 
-            // Expressão Primária de Array em ambos os lados
-            if (leftExpressionAST.getType() == Type.ARRAY_TYPE && rightExpressionAST.getType() == Type.ARRAY_TYPE) {
-                final VariableData leftArrayData = (VariableData) leftExpressionAST.getData();
-                if (!vt.varExists(leftArrayData.getIndex())) { // Variável inexistente
-                    final String message = String.format("SEMANTIC ERROR (%d): Variable not declared",
-                            variable.getLine());
-                    semanticError(message);
-                }
-                final Type LeftArrayVariableType = vt.getSubType(leftArrayData.getIndex());
-                final VariableData rightArrayData = (VariableData) leftExpressionAST.getData();
-                if (!vt.varExists(rightArrayData.getIndex())) { // Variável inexistente
-                    final String message = String.format("SEMANTIC ERROR (%d): Variable not declared",
-                            variable.getLine());
-                    semanticError(message);
-                }
-                final Type RightArrayVariableType = vt.getSubType(rightArrayData.getIndex());
-                checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), LeftArrayVariableType,
-                        RightArrayVariableType);
-
-                assignNode.addChildren(leftExpressionAST); // Array no lado esquerdo, setDados
-                assignNode.addChildren(rightExpressionAST);
-                assignmentListNode.addChildren(assignNode);
-            }
-
-            // Expressão Primária de Array na Esquerda
-            if (leftExpressionAST.getType() == Type.ARRAY_TYPE) {
-                final VariableData arrayData = (VariableData) leftExpressionAST.getData();
-                if (!vt.varExists(arrayData.getIndex())) { // Variável inexistente
-                    final String message = String.format("SEMANTIC ERROR (%d): Variable not declared",
-                            variable.getLine());
-                    semanticError(message);
-                }
-                final Type ArrayVariableType = vt.getSubType(arrayData.getIndex());
-                checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), ArrayVariableType,
-                        rightExpressionAST.getType());
-
-                assignNode.addChildren(leftExpressionAST); // Array no lado esquerdo, setDados
-                assignNode.addChildren(rightExpressionAST);
-                assignmentListNode.addChildren(assignNode);
-
-                // Expressão Primária de Array na Direita
-            } else if (rightExpressionAST.getType() == Type.ARRAY_TYPE) {
-                final VariableData arrayData = (VariableData) rightExpressionAST.getData();
-                final Type ArrayVariableType = vt.getSubType(arrayData.getIndex());
-                checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), ArrayVariableType,
-                        leftExpressionAST.getType());
-
-                assignNode.addChildren(leftExpressionAST); // Array na direita, getDados
-                assignNode.addChildren(rightExpressionAST);
-                assignmentListNode.addChildren(assignNode);
-            } else {
-                // Não é array!
-                final AST VariableAST = checkVar(variable);
-                if (VariableAST.getKind() != NodeKind.VAR_DECL_NODE || VariableAST.getKind() != NodeKind.VAR_USE_NODE) {
-                    final String message = String.format("SEMANTIC ERROR (%d): Left expression should be a Variable",
-                            ctx.getStart().getLine());
-                    semanticError(message);
-                }
-                checkTypeError(variable.getLine(), NodeKind.ASSIGN_NODE.toString(), VariableAST.getType(),
-                        rightExpressionAST.getType());
-                assignNode.addChildren(VariableAST, rightExpressionAST);
-                assignmentListNode.addChildren(assignNode);
+            // Tem que lidar com Arrays de alguma forma
+            if (leftExpressionAST.getType() == Type.ARRAY_TYPE || rightExpressionAST.getType() == Type.ARRAY_TYPE) {
+                this.visitArrayAssignment(variable.getLine(), assignNode, assignmentListNode, leftExpressionAST, rightExpressionAST);
+            }  else { 
+                // Não tem array!
+                this.visitVariableAssignment(variable, leftExpressionAST, rightExpressionAST, assignNode, assignmentListNode);
             }
         }
         return assignmentListNode;
@@ -637,7 +679,6 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     /*
      * <----------------- Operadores do Expression ----------------->
      */
-
     @Override
     public AST visitVisitPrimaryExprComposta(final VisitPrimaryExprCompostaContext ctx) {
         if (ctx.index() != null) { // Para o caso de acesso à espaço de um array
