@@ -78,3 +78,5 @@ parser
 bin
 
 .DS_STORE
+
+src/test/resources/semanticExamples/out/
