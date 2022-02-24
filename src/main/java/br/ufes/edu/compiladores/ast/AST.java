@@ -28,6 +28,11 @@ public class AST {
 		Collections.addAll(this.children, children);
 	}
 
+    public void addChild(final AST child) {
+		this.children.add(child);
+	}
+
+
 	public List<AST> getChildren() {
 		return this.children;
 	}

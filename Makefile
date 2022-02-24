@@ -9,7 +9,7 @@ JAVAC=javac
 ROOT=$(shell pwd)
 
 # Modifique aqui o path do seu antlr, ou só modifique a variavel ANTLR4 para o comando do seu antlr global
-ANTLR_PATH=/usr/local/lib/antlr/antlr-4.9.3-complete.jar
+ANTLR_PATH=/usr/local/lib/antlr-4.9-complete.jar
 CLASS_PATH_OPTION=-cp .:$(ANTLR_PATH) 
 
 # Comandos como descritos na página do ANTLR.
@@ -21,8 +21,8 @@ ROOT_JAVA=$(ROOT)/src/main/java/br/ufes/edu/compiladores
 ROOT_ANTLR=$(ROOT)/src/main/antlr4/br/ufes/edu/compiladores
 
 # Diretório para os arquivos .class
-BIN_PATH=$(ROOT)/target
-GEN_PATH=$(BIN_PATH)/generated-sources/antlr4/br/ufes/edu/compiladores
+BIN_PATH=$(ROOT)/bin
+GEN_PATH=$(BIN_PATH)/generated
 
 # Diretório para os casos de teste
 DATA=$(ROOT)/src/test/resources
@@ -40,8 +40,7 @@ antlr:
 
 javac:	
 	@mkdir -p $(BIN_PATH)
-	@echo $(BIN_PATH) */*.java
-	$(JAVAC) $(CLASS_PATH_OPTION) -d $(BIN_PATH) $(ROOT_JAVA)/*.java
+	$(JAVAC) $(CLASS_PATH_OPTION) -d $(BIN_PATH) */*.java
 
 
 run:

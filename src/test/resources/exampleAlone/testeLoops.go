@@ -9,6 +9,6 @@ func ForStmts() {
 	a, b = 1, 2
 	for a < b {
 		fmt.Println("From condition-only ForStmt")
-		break
+		a = a + 1
 	}
 }
