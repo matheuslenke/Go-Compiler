@@ -10,6 +10,11 @@ func ForStmts() {
 	for a < b {
 		fmt.Println("From condition-only ForStmt")
 		a = a + 1
+
+		for (b < 3) {
+			fmt.Println("From condition-only ForStmt")
+			b = b + 1
+		}
 	}
 
 	for a <= b {
