@@ -17,7 +17,9 @@ func testeIf() {
 
 	if (b == true) {
 		fmt.Println("True")
-	} else {
+	} 
+	
+	if (b == false) {
 		fmt.Println("False")
 	}
 
@@ -25,5 +27,11 @@ func testeIf() {
 		fmt.Println("A é menor igual a 2")
 	} else {
 			fmt.Println("A é maior igual a 2")
+	}
+
+	if (a >= 5) {
+		fmt.Println("A maior igual a 5")
+	} else {
+		fmt.Println("A menor que 5")
 	}
 }

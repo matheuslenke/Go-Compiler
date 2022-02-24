@@ -78,8 +78,8 @@
                 <version>${antlr4test-maven-plugin.version}</version>
                 <configuration>
                     <scenarios>
-                        <scenario>
-                            <scenarioName>TestAllFiles</scenarioName>
+                        <!-- <scenario>
+                            <scenarioName>TestCheckpoint1</scenarioName>
                             <verbose>true</verbose>
                             <showTree>false</showTree>
                             <enabled>false</enabled>
@@ -88,17 +88,17 @@
                             <packageName>br.ufes.edu.compiladores</packageName>
                             <testFileExtension>.go</testFileExtension>
                             <exampleFiles>src/test/resources/examples</exampleFiles>
-                        </scenario> 
+                        </scenario>  -->
                         <scenario>
-                            <scenarioName>TestOneFile</scenarioName>
-                            <verbose>true</verbose>
+                            <scenarioName>TestCheckpoint2</scenarioName>
+                            <verbose>false</verbose>
                             <showTree>false</showTree>
                             <enabled>true</enabled>
                             <entryPoint>sourceFile</entryPoint>
                             <grammarName>Go</grammarName>
                             <testFileExtension>.go</testFileExtension>
                             <packageName>br.ufes.edu.compiladores</packageName>
-                            <exampleFiles>src/test/resources/exampleAlone</exampleFiles>
+                            <exampleFiles>src/test/resources/semanticExamples</exampleFiles>
                         </scenario>
                     </scenarios>
                 </configuration>

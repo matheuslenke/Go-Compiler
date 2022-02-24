@@ -8,7 +8,12 @@ func TesteAtribuicaoFalhaTipo() {
 	var e float32 = -1.0 // +
 	var numero int = 300
 
-	fmt.Println(numero)
+	var test string = "Teste"
+
+	fmt.Println(test)
+
+	var readVar string
+	fmt.Scanln(readVar)
 	// numero = e
 	// fmt.Println(numero)
 

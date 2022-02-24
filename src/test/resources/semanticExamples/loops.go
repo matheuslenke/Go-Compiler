@@ -9,6 +9,15 @@ func ForStmts() {
 	a, b = 1, 2
 	for a < b {
 		fmt.Println("From condition-only ForStmt")
-		break
+		a = a + 1
+	}
+
+	for a <= b {
+		fmt.Println("For running")
+		a = a + 1
+	}
+
+	for a == a {
+		fmt.Println("Infinity loop")
 	}
 }

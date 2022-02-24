@@ -16,10 +16,12 @@ func func2() string {
 	return s
 }
 
-func func3(a, b string) (string, string) {
+func func3(a, b string) int {
 	// var resultF1 string = func2()
 	var s3, s4 string = "func1", "Hello world" + "t"
-	return s3, s4
+
+	var returnVar int = 5
+	return returnVar
 }
 
 func func4() {

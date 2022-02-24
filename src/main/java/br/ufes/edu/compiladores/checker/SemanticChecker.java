@@ -543,6 +543,16 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
                 final Token identifierSymbol = identifierList.get(i).getSymbol();
                 final AST value = this.visit(ctx.expressionList().expression(i));
+                if (value.getType() == Type.ARRAY_TYPE) {
+                    final String message = String.format("SEMANTIC ERROR (%d): Cannot declare variable implicitly with Array",
+                    identifierSymbol.getLine());
+                    semanticError(message);
+                }
+                if (value.getKind() == NodeKind.FUNC_USE_NODE) {
+                    final String message = String.format("SEMANTIC ERROR (%d): Cannot declare variable implicitly with Function",
+                    identifierSymbol.getLine());
+                    semanticError(message);
+                }
 
                 final AST newVar = this.newVar(identifierSymbol);
 
@@ -570,6 +580,17 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
                 final Token identifierSymbol = identifierList.get(i).getSymbol();
                 final AST value = this.visit(ctx.expressionList().expression(i));
+
+                if (value.getType() == Type.ARRAY_TYPE) {
+                    final String message = String.format("SEMANTIC ERROR (%d): Cannot declare variable implicitly with Array",
+                    identifierSymbol.getLine());
+                    semanticError(message);
+                }
+                if (value.getKind() == NodeKind.FUNC_USE_NODE) {
+                    final String message = String.format("SEMANTIC ERROR (%d): Cannot declare variable implicitly with Function",
+                    identifierSymbol.getLine());
+                    semanticError(message);
+                }
 
                 final AST newVar = this.newVar(identifierSymbol);
 

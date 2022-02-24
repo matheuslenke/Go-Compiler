@@ -1,22 +1,35 @@
 #!/bin/bash
 
 # Ajeite essa variável como feito no Makefile
-ANTLR_PATH=/usr/local/lib/antlr/antlr-4.9.3-complete.jar
-CLASS_PATH_OPTION=-cp .:$ANTLR_PATH
+ANTLR_PATH=antlr
 
-DATA=$ROOT/src/test/resources
-IN=$DATA/examples
-OUT=out
-
+DATA=./src/test/resources
+IN=$DATA/semanticExamples
+ERRORIN=$DATA/semanticExamples/withErrors
+OUT=$DATA/semanticExamples/out
+ERROROUT=$OUT/withErrors
 
 rm -rf $OUT
 mkdir $OUT
-for infile in `ls $IN/*.go`; do
+mvn compile
+# for infile in `ls $IN/*.go`; do
+#     base=$(basename $infile)
+#     outfile=$OUT/${base/.go/.out}
+#     dotfile=$OUT/${base/.go/.dot}
+#     pdffile=$OUT/${base/.go/.pdf}
+#     echo Running $base
+#     mvn exec:java -Dexec.args="$infile"  1> $outfile 2> $dotfile
+#     dot -Tpdf $dotfile -o $pdffile
+# done
+
+echo Running with errors
+mkdir $ERROROUT
+for infile in `ls $ERRORIN/*.go`; do
     base=$(basename $infile)
-    outfile=$OUT/${base/.go/.out}
-    dotfile=$OUT/${base/.go/.dot}
-    pdffile=$OUT/${base/.go/.pdf}
+    outfile=$ERROROUT/${base/.go/.out}
+    dotfile=$ERROROUT/${base/.go/.dot}
+    pdffile=$ERROROUT/${base/.go/.pdf}
     echo Running $base
-    java $CLASS_PATH_OPTION:target GoCompiler $infile 1> $outfile 2> $dotfile
+    mvn exec:java -Dexec.args="$infile"  1> $outfile 2> $dotfile
     dot -Tpdf $dotfile -o $pdffile
 done
