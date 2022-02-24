@@ -45,12 +45,15 @@ public enum NodeKind {
     QUALIFIED_IDENTIFIER_NODE("qualified_identifier"),
     CONVERSION_NODE("conversion"),
 
+
     // Signature
     SIGNATURE_NODE("signature"),
     PARAMETERS_NODE("parameters"),
     RESULT_NODE("result"),
     PARAMETER_DECLARATION("parameter_declaration"),
     RETURN_NODE("return"),
+    READ_OPERATION("write"),
+    WRITE_OPERATION("read"),
 
     // Declarações de Tipo
     TYPE_DECLARATION("type_declaration"),

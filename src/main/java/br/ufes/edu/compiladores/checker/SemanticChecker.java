@@ -82,6 +82,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                     "SEMANTIC ERROR (%d): variable '%s' was not declared.\n",
                     line, text));
             System.exit(1);
+
         }
 
         return new AST(NodeKind.VAR_USE_NODE, new VariableData(index), vt.getType(index));
@@ -214,21 +215,21 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
     }
 
     private void checkParametersTypeFromFunctionCall(final AST funcAST, final AST var) {
-        for(AST child : funcAST.getChildren()) {
-            if(child.getKind() == NodeKind.PARAMETERS_NODE) {
+        for (AST child : funcAST.getChildren()) {
+            if (child.getKind() == NodeKind.PARAMETERS_NODE) {
                 Integer totalParameters = child.getChildren().size();
                 Integer totalArguments = var.getChildren().size();
-                if( totalParameters != totalArguments) {
+                if (totalParameters != totalArguments) {
                     final String message = String.format(
-                        "SEMANTIC ERROR (%d): Wrong number of arguments from function call expected (%d) but got (%d)",
-                        0, totalParameters, totalArguments);
+                            "SEMANTIC ERROR (%d): Wrong number of arguments from function call expected (%d) but got (%d)",
+                            0, totalParameters, totalArguments);
                     semanticError(message);
                 }
 
-                for(int i = 0; i< totalArguments; i++) {
+                for (int i = 0; i < totalArguments; i++) {
                     Optional<AST> ParameterNodeOpt = child.getChild(i);
                     Optional<AST> argumentNodeOpt = var.getChild(i);
-                    if(ParameterNodeOpt.isPresent() && argumentNodeOpt.isPresent()) {
+                    if (ParameterNodeOpt.isPresent() && argumentNodeOpt.isPresent()) {
                         AST parameterNode = ParameterNodeOpt.get();
                         AST argumentNode = argumentNodeOpt.get();
                         
@@ -242,8 +243,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
                         if(paramType != argumentType) {
                             final String message = String.format(
-                                "SEMANTIC ERROR (%d): Wrong type of argument from function call. Expected (%s) but got (%s)",
-                                0, parameterNode.getType().toString(), argumentNode.getType().toString());
+                                    "SEMANTIC ERROR (%d): Wrong type of argument from function call. Expected (%s) but got (%s)",
+                                    0, parameterNode.getType().toString(), argumentNode.getType().toString());
                             semanticError(message);
                         }
                     }
@@ -255,8 +256,8 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
     private void checkReturnTypeFromFunctionCall(Integer index, Integer line, final AST leftExpressionAST, final AST functionUseAST) {
         for (AST funcChild : functionUseAST.getChildren()) {
-            if(funcChild.getKind() == NodeKind.VAR_USE_NODE) {
-                VariableData funcVarData = (VariableData) funcChild.getData(); 
+            if (funcChild.getKind() == NodeKind.VAR_USE_NODE) {
+                VariableData funcVarData = (VariableData) funcChild.getData();
                 AST functionAST = vt.getAstNode(funcVarData.getIndex());
 
                 for (AST functionDeclChild : functionAST.getChildren()) {
@@ -272,7 +273,6 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                                 varType = vt.getSubType(varData.getIndex());
                             }
                             
-
                             if(resultType != varType) {
                                 final String message = String.format(
                                 "SEMANTIC ERROR (%d): Wrong type of return, expected (%s) but got (%s)",
@@ -311,7 +311,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 this.root.addChildren(child);
             }
         }
-        
+
         for (final FunctionDeclContext functionDeclContext : ctx.functionDecl()) {
             final AST functionDecl = visit(functionDeclContext);
             if (functionDecl != null) {
@@ -725,14 +725,19 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             final AST functionAST = this.visit(ctx.primaryExpr());
             final AST argumentsAST = this.visit(ctx.arguments());
 
-            VariableData funcVarData = (VariableData) functionAST.getData(); 
+            VariableData funcVarData = (VariableData) functionAST.getData();
             AST functionDeclNode = vt.getAstNode(funcVarData.getIndex());
 
             checkParametersTypeFromFunctionCall(functionDeclNode, argumentsAST);
+            String textFunc = this.vt.getName(((VariableData) functionAST.getData()).getIndex());
+            if ("Println".equals(textFunc)) {
+                return AST.newSubtree(NodeKind.READ_OPERATION, Type.NO_TYPE, functionAST, argumentsAST);
+            }
+            if ("Scanln".equals(textFunc)) {
+                return AST.newSubtree(NodeKind.WRITE_OPERATION, Type.NO_TYPE, functionAST, argumentsAST);
+            }
+            return AST.newSubtree(NodeKind.FUNC_USE_NODE, Type.NO_TYPE, functionAST, argumentsAST);
 
-            final AST functionUseNode = AST.newSubtree(NodeKind.FUNC_USE_NODE, Type.NO_TYPE, functionAST, argumentsAST);
-
-            return functionUseNode;
         } else {
             return this.visit(ctx);
         }
@@ -841,13 +846,15 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         checkTypeError(relOpToken.getLine(), relOpToken.getText(), lType, rType);
 
         lastDeclType = Type.BOOL_TYPE;
-        String test = relOpToken.getText();
         return AST.newSubtree(NodeKind.fromValue(relOpToken.getText()), Type.BOOL_TYPE, l, r);
 
     }
 
     @Override
     public AST visitOperandName(final OperandNameContext ctx) {
+        if ("fmt".equals(ctx.IDENTIFIER(0).getSymbol().getText())) {
+            return checkVar(ctx.IDENTIFIER(1).getSymbol());
+        }
         return checkVar(ctx.IDENTIFIER(0).getSymbol());
     }
 
@@ -866,8 +873,54 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                     currentLine, text, currentLine));
             System.exit(1);
         }
+
         final Integer idx = vt.addVar(text, currentLine, Type.NO_TYPE);
-        return new AST(NodeKind.IMPORT_SPEC, new VariableData(idx), Type.NO_TYPE);
+        AST importSpectAst = new AST(NodeKind.IMPORT_SPEC, new VariableData(idx), Type.NO_TYPE);
+
+        declaraIO(text, currentLine, importSpectAst);
+        return importSpectAst;
+    }
+
+    private void declaraIO(final String text, final int currentLine, AST importSpectAst) {
+        if ("fmt".equals(text)) {
+
+            int indexPrintLn = vt.addVar("Println", currentLine, Type.NO_TYPE);
+            AST funcPrintAST = new AST(NodeKind.FUNC_DECL_NODE,
+                    new VariableData(indexPrintLn),
+                    Type.NO_TYPE);
+
+            vt.openScope("Println");
+            AST parametersAST = AST.newSubtree(NodeKind.PARAMETERS_NODE, Type.NO_TYPE);
+
+            parametersAST.addChild(new AST(NodeKind.VAR_DECL_NODE,
+                    new VariableData(vt.addVar("arg", currentLine, Type.STR_TYPE)), Type.STR_TYPE));
+
+            AST resultAST = AST.newSubtree(NodeKind.RESULT_NODE, Type.NO_TYPE);
+
+            funcPrintAST.addChildren(parametersAST, resultAST);
+            vt.setAstNode(indexPrintLn, funcPrintAST);
+
+            vt.closeScope();
+
+            int indexScanln = vt.addVar("Scanln", currentLine, Type.NO_TYPE);
+            AST funcScanAST = new AST(NodeKind.FUNC_DECL_NODE,
+                    new VariableData(indexScanln),
+                    Type.NO_TYPE);
+
+            vt.openScope("Scanln");
+            parametersAST = AST.newSubtree(NodeKind.PARAMETERS_NODE, Type.NO_TYPE);
+
+            parametersAST.addChild(new AST(NodeKind.VAR_DECL_NODE,
+                    new VariableData(vt.addVar("arg", currentLine, Type.STR_TYPE)), Type.STR_TYPE));
+
+            resultAST = AST.newSubtree(NodeKind.RESULT_NODE, Type.NO_TYPE);
+
+            funcScanAST.addChildren(parametersAST, resultAST);
+            vt.setAstNode(indexScanln, funcScanAST);
+
+            vt.closeScope();
+            importSpectAst.addChildren(funcPrintAST, funcScanAST);
+        }
     }
 
     /*
