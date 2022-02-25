@@ -1,0 +1,44 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< br.ufes.edu.compiladores:go-compiler >----------------
+[INFO] Building Compilador de GO 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ go-compiler ---
+PARSE SUCCESSFUL
+
+
+
+Strings table:
+Entry 0: World
+
+
+
+
+Variables table:
+Entry 0 -- name: fmt, line: 3, type: no_type, scopeName: global
+Entry 1 -- name: Println, line: 3, type: no_type, scopeName: global
+Entry 2 -- name: arg, line: 3, type: string, scopeName: Println
+Entry 3 -- name: Scanln, line: 3, type: no_type, scopeName: global
+Entry 4 -- name: arg, line: 3, type: string, scopeName: Scanln
+Entry 5 -- name: testeArrayAssign, line: 5, type: func, scopeName: global
+Entry 6 -- name: StringVar, line: 7, type: string, scopeName: testeArrayAssign
+Entry 7 -- name: IntVar, line: 8, type: int, scopeName: testeArrayAssign
+Entry 8 -- name: Float32Var, line: 9, type: float, scopeName: testeArrayAssign
+Entry 9 -- name: Float64Var, line: 10, type: float, scopeName: testeArrayAssign
+Entry 10 -- name: BoolVar, line: 11, type: bool, scopeName: testeArrayAssign
+Entry 11 -- name: a, line: 13, type: array, subtype: string, scopeName: testeArrayAssign
+Entry 12 -- name: b, line: 17, type: array, subtype: int, scopeName: testeArrayAssign
+Entry 13 -- name: c, line: 21, type: array, subtype: float, scopeName: testeArrayAssign
+Entry 14 -- name: d, line: 25, type: array, subtype: float, scopeName: testeArrayAssign
+Entry 15 -- name: e, line: 29, type: array, subtype: bool, scopeName: testeArrayAssign
+
+
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.778 s
+[INFO] Finished at: 2022-02-24T20:53:40-03:00
+[INFO] ------------------------------------------------------------------------

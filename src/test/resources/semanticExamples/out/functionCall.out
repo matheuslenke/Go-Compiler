@@ -1,0 +1,48 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< br.ufes.edu.compiladores:go-compiler >----------------
+[INFO] Building Compilador de GO 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ go-compiler ---
+PARSE SUCCESSFUL
+
+
+
+Strings table:
+Entry 0: Hello World
+
+
+
+
+Variables table:
+Entry 0 -- name: fmt, line: 3, type: no_type, scopeName: global
+Entry 1 -- name: Println, line: 3, type: no_type, scopeName: global
+Entry 2 -- name: arg, line: 3, type: string, scopeName: Println
+Entry 3 -- name: Scanln, line: 3, type: no_type, scopeName: global
+Entry 4 -- name: arg, line: 3, type: string, scopeName: Scanln
+Entry 5 -- name: funcao1, line: 5, type: func, scopeName: global
+Entry 6 -- name: str, line: 6, type: string, scopeName: funcao1
+Entry 7 -- name: somaDoisNumeros, line: 11, type: func, scopeName: global
+Entry 8 -- name: a, line: 11, type: int, scopeName: somaDoisNumeros
+Entry 9 -- name: b, line: 11, type: int, scopeName: somaDoisNumeros
+Entry 10 -- name: c, line: 12, type: int, scopeName: somaDoisNumeros
+Entry 11 -- name: retornaDobro, line: 17, type: func, scopeName: global
+Entry 12 -- name: a, line: 17, type: float, scopeName: retornaDobro
+Entry 13 -- name: c, line: 18, type: float, scopeName: retornaDobro
+Entry 14 -- name: funcao2, line: 22, type: func, scopeName: global
+Entry 15 -- name: a, line: 24, type: int, scopeName: funcao2
+Entry 16 -- name: b, line: 25, type: int, scopeName: funcao2
+Entry 17 -- name: c, line: 26, type: float, scopeName: funcao2
+Entry 18 -- name: result, line: 27, type: int, scopeName: funcao2
+Entry 19 -- name: array, line: 28, type: array, subtype: int, scopeName: funcao2
+
+
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.866 s
+[INFO] Finished at: 2022-02-24T20:53:46-03:00
+[INFO] ------------------------------------------------------------------------

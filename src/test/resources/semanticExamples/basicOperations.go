@@ -1,8 +1,5 @@
 package samples
 
-import fmt "fmt"
-
-
 func testeOperacao() {
 	var int1 int = -1 // +
 	var int2 int = 300
@@ -16,13 +13,4 @@ func testeOperacao() {
 	var lt bool = int1 < int2
 	var gt bool = int1 > int2
 
-	fmt.Println(add)
-	fmt.Println(sub)
-	fmt.Println(mul)
-	fmt.Println(add)
-	fmt.Println(div)
-	fmt.Println(eq)
-	fmt.Println(lt)
-	fmt.Println(gt)
-	
 }

@@ -12,16 +12,15 @@ func ParamTest(a, b int) {
 	a = 5
 }
 
-func ParamTest2(param1,param2 string, param3 float32) {
-	fmt.Println(param3);
+func ParamTest2(param1, param2 string, param3 float32) {
+	fmt.Println("String teste")
 }
 
-func ParamTest3(param int) (result1, result2 float32) {
+func ParamTest3(param int) float32 {
 	var returnVar float32 = 1.0
 	return returnVar
-	result1 = 2.5
 }
 
-func ParamTest4() (string, string) {
-	return "Testando", "Testando"
+func ParamTest4() string {
+	return "Testando"
 }

@@ -11,6 +11,11 @@ func testeIf() {
 
 	if (a > 0) {
 		fmt.Println("A é maior que 0")
+		if (a < 0) {			
+			fmt.Println("A é menor que 0")
+		} else {
+			fmt.Println("A é maior que 0")
+		}
 	} else {
 		fmt.Println("A é menor que 0")
 	}
