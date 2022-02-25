@@ -506,13 +506,23 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                 final Token identifierSymbol = identifierList.get(i).getSymbol();
                 final AST newVar = this.newVar(identifierSymbol);
 
-                final AST value = this.visit(ctx.expressionList().expression(i));
+                final ExpressionContext value = ctx.expressionList().expression(i);
+                final AST rightExpressionAST = this.visit(value);
+                
+                // Verificações de atribuição
+                this.verifyAssignConstraints(identifierSymbol.getLine(), newVar, rightExpressionAST);
+                
+                // Tem que lidar com Arrays de alguma forma
+                if (newVar.getType() == Type.ARRAY_TYPE || rightExpressionAST.getType() == Type.ARRAY_TYPE) {
+                    this.visitArrayAssignment(i, identifierSymbol.getLine(), assignNode, variableDeclaration, newVar, rightExpressionAST);
+                }  else if(rightExpressionAST.getKind() == NodeKind.FUNC_USE_NODE) { 
+                    // Não tem array mas tem função!
+                    this.visitVariableAssigmentWithFunctionReturn(i, identifierSymbol, newVar, rightExpressionAST, assignNode, variableDeclaration);
+                } else {
+                    // Somente variáveis base
+                    this.visitVariableAssignment(i, identifierSymbol, newVar, rightExpressionAST, assignNode, variableDeclaration);
+                }
 
-                checkTypeError(identifierSymbol.getLine(), NodeKind.ASSIGN_NODE.toString(), newVar.getType(),
-                        value.getType());
-
-                assignNode.addChildren(newVar, value);
-                variableDeclaration.addChildren(assignNode);
             }
         } else {
             for (final TerminalNode identifier : identifierList) {
