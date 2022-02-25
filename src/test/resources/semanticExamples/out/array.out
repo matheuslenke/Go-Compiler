@@ -1,0 +1,41 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< br.ufes.edu.compiladores:go-compiler >----------------
+[INFO] Building Compilador de GO 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ go-compiler ---
+PARSE SUCCESSFUL
+
+
+
+Strings table:
+
+
+
+
+Variables table:
+Entry 0 -- name: testeArrays, line: 3, type: func, scopeName: global
+Entry 1 -- name: a, line: 5, type: array, subtype: string, scopeName: testeArrays
+Entry 2 -- name: b, line: 6, type: array, subtype: int, scopeName: testeArrays
+Entry 3 -- name: c, line: 7, type: array, subtype: float, scopeName: testeArrays
+Entry 4 -- name: d, line: 8, type: array, subtype: float, scopeName: testeArrays
+Entry 5 -- name: e, line: 9, type: array, subtype: bool, scopeName: testeArrays
+Entry 6 -- name: IntVar, line: 11, type: int, scopeName: testeArrays
+Entry 7 -- name: float32Var, line: 15, type: float, scopeName: testeArrays
+Entry 8 -- name: float64Var, line: 19, type: float, scopeName: testeArrays
+Entry 9 -- name: trueVar, line: 23, type: bool, scopeName: testeArrays
+Entry 10 -- name: falseVar, line: 24, type: bool, scopeName: testeArrays
+Entry 11 -- name: addFloat, line: 29, type: float, scopeName: testeArrays
+Entry 12 -- name: mulFloat, line: 30, type: float, scopeName: testeArrays
+Entry 13 -- name: relFloat, line: 31, type: bool, scopeName: testeArrays
+
+
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.849 s
+[INFO] Finished at: 2022-02-24T20:53:38-03:00
+[INFO] ------------------------------------------------------------------------
