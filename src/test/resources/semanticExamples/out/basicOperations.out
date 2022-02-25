@@ -1,0 +1,50 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< br.ufes.edu.compiladores:go-compiler >----------------
+[INFO] Building Compilador de GO 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ go-compiler ---
+PARSE SUCCESSFUL
+
+
+
+Strings table:
+Entry 0: Hello
+Entry 1: World
+
+
+
+
+Variables table:
+Entry 0 -- name: testeOperacao, line: 3, type: func, scopeName: global
+Entry 1 -- name: int1, line: 4, type: int, scopeName: testeOperacao
+Entry 2 -- name: int2, line: 5, type: int, scopeName: testeOperacao
+Entry 3 -- name: add, line: 7, type: int, scopeName: testeOperacao
+Entry 4 -- name: sub, line: 8, type: int, scopeName: testeOperacao
+Entry 5 -- name: mul, line: 9, type: int, scopeName: testeOperacao
+Entry 6 -- name: div, line: 10, type: int, scopeName: testeOperacao
+Entry 7 -- name: eq, line: 12, type: bool, scopeName: testeOperacao
+Entry 8 -- name: lt, line: 13, type: bool, scopeName: testeOperacao
+Entry 9 -- name: gt, line: 14, type: bool, scopeName: testeOperacao
+Entry 10 -- name: let, line: 15, type: bool, scopeName: testeOperacao
+Entry 11 -- name: get, line: 16, type: bool, scopeName: testeOperacao
+Entry 12 -- name: float1, line: 18, type: float, scopeName: testeOperacao
+Entry 13 -- name: float2, line: 19, type: float, scopeName: testeOperacao
+Entry 14 -- name: add2, line: 21, type: float, scopeName: testeOperacao
+Entry 15 -- name: sub2, line: 22, type: float, scopeName: testeOperacao
+Entry 16 -- name: mul2, line: 23, type: float, scopeName: testeOperacao
+Entry 17 -- name: div2, line: 24, type: float, scopeName: testeOperacao
+Entry 18 -- name: string1, line: 26, type: string, scopeName: testeOperacao
+Entry 19 -- name: string2, line: 27, type: string, scopeName: testeOperacao
+Entry 20 -- name: add3, line: 29, type: string, scopeName: testeOperacao
+
+
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.986 s
+[INFO] Finished at: 2022-02-24T21:09:06-03:00
+[INFO] ------------------------------------------------------------------------

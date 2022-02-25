@@ -1,3 +1,0 @@
-line 7:1 extraneous input '/' expecting {'break', 'func', 'interface', 'select', 'defer', 'go', 'map', 'struct', 'chan', 'goto', 'switch', 'const', 'fallthrough', 'if', 'type', 'continue', 'for', 'return', 'var', 'nil', IDENTIFIER, '(', '{', '}', '[', ';', '!', '+', '-', '^', '*', '&', '<-', DECIMAL_LIT, BINARY_LIT, OCTAL_LIT, HEX_LIT, FLOAT_LIT, IMAGINARY_LIT, RUNE_LIT, RAW_STRING_LIT, INTERPRETED_STRING_LIT}
-line 7:11 no viable alternative at input 'sem'
-line 7:22 no viable alternative at input 'comentario'

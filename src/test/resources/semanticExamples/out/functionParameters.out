@@ -1,0 +1,45 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< br.ufes.edu.compiladores:go-compiler >----------------
+[INFO] Building Compilador de GO 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ go-compiler ---
+PARSE SUCCESSFUL
+
+
+
+Strings table:
+Entry 0: String teste
+Entry 1: Testando
+
+
+
+
+Variables table:
+Entry 0 -- name: fmt, line: 3, type: no_type, scopeName: global
+Entry 1 -- name: Println, line: 3, type: no_type, scopeName: global
+Entry 2 -- name: arg, line: 3, type: string, scopeName: Println
+Entry 3 -- name: Scanln, line: 3, type: no_type, scopeName: global
+Entry 4 -- name: arg, line: 3, type: string, scopeName: Scanln
+Entry 5 -- name: ParamTest, line: 5, type: func, scopeName: global
+Entry 6 -- name: a, line: 5, type: int, scopeName: ParamTest
+Entry 7 -- name: b, line: 5, type: int, scopeName: ParamTest
+Entry 8 -- name: ParamTest2, line: 15, type: func, scopeName: global
+Entry 9 -- name: param1, line: 15, type: string, scopeName: ParamTest2
+Entry 10 -- name: param2, line: 15, type: string, scopeName: ParamTest2
+Entry 11 -- name: param3, line: 15, type: float, scopeName: ParamTest2
+Entry 12 -- name: ParamTest3, line: 19, type: func, scopeName: global
+Entry 13 -- name: param, line: 19, type: int, scopeName: ParamTest3
+Entry 14 -- name: returnVar, line: 20, type: float, scopeName: ParamTest3
+Entry 15 -- name: ParamTest4, line: 24, type: func, scopeName: global
+
+
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.802 s
+[INFO] Finished at: 2022-02-24T20:53:50-03:00
+[INFO] ------------------------------------------------------------------------

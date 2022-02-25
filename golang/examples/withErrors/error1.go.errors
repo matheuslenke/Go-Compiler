@@ -1,6 +1,0 @@
-line 11:42 no viable alternative at input 'func() { fmt.Println("Create and invoke!"}'
-line 11:42 no viable alternative at input 'fmt.Println("Create and invoke!"}'
-line 11:43 no viable alternative at input '('
-line 24:0 extraneous input 'if' expecting {<EOF>, 'func', 'const', 'type', 'var'}
-line 26:10 mismatched input ':=' expecting {'func', 'interface', 'map', 'struct', 'chan', IDENTIFIER, '(', '[', '=', '*', '<-'}
-line 32:0 mismatched input '<EOF>' expecting {'break', 'func', 'interface', 'select', 'defer', 'go', 'map', 'struct', 'chan', 'goto', 'switch', 'const', 'fallthrough', 'if', 'type', 'continue', 'for', 'return', 'var', 'nil', IDENTIFIER, '(', '{', '}', '[', ';', '!', '+', '-', '^', '*', '&', '<-', DECIMAL_LIT, BINARY_LIT, OCTAL_LIT, HEX_LIT, FLOAT_LIT, IMAGINARY_LIT, RUNE_LIT, RAW_STRING_LIT, INTERPRETED_STRING_LIT}

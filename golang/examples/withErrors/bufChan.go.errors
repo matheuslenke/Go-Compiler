@@ -1,3 +1,0 @@
-line 13:4 no viable alternative at input '5'
-line 16:3 no viable alternative at input 'ok'
-line 18:9 extraneous input '<' expecting {'func', 'interface', 'map', 'struct', 'chan', 'nil', IDENTIFIER, '(', '[', '!', '+', '-', '^', '*', '&', '<-', DECIMAL_LIT, BINARY_LIT, OCTAL_LIT, HEX_LIT, FLOAT_LIT, IMAGINARY_LIT, RUNE_LIT, RAW_STRING_LIT, INTERPRETED_STRING_LIT}

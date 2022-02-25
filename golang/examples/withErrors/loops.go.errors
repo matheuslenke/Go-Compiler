@@ -1,5 +1,0 @@
-line 11:23 missing '{' at ';'
-line 11:25 no viable alternative at input 'j'
-line 11:29 no viable alternative at input '{'
-line 16:5 extraneous input '}' expecting {'func', 'interface', 'map', 'struct', 'chan', 'range', 'nil', IDENTIFIER, '(', '{', '[', ';', '!', '+', '-', '^', '*', '&', '<-', DECIMAL_LIT, BINARY_LIT, OCTAL_LIT, HEX_LIT, FLOAT_LIT, IMAGINARY_LIT, RUNE_LIT, RAW_STRING_LIT, INTERPRETED_STRING_LIT}
-line 19:0 no viable alternative at input '<EOF>'
