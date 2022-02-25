@@ -10,6 +10,8 @@ PARSE SUCCESSFUL
 
 
 Strings table:
+Entry 0: Hello
+Entry 1: World
 
 
 
@@ -25,6 +27,17 @@ Entry 6 -- name: div, line: 10, type: int, scopeName: testeOperacao
 Entry 7 -- name: eq, line: 12, type: bool, scopeName: testeOperacao
 Entry 8 -- name: lt, line: 13, type: bool, scopeName: testeOperacao
 Entry 9 -- name: gt, line: 14, type: bool, scopeName: testeOperacao
+Entry 10 -- name: let, line: 15, type: bool, scopeName: testeOperacao
+Entry 11 -- name: get, line: 16, type: bool, scopeName: testeOperacao
+Entry 12 -- name: float1, line: 18, type: float, scopeName: testeOperacao
+Entry 13 -- name: float2, line: 19, type: float, scopeName: testeOperacao
+Entry 14 -- name: add2, line: 21, type: float, scopeName: testeOperacao
+Entry 15 -- name: sub2, line: 22, type: float, scopeName: testeOperacao
+Entry 16 -- name: mul2, line: 23, type: float, scopeName: testeOperacao
+Entry 17 -- name: div2, line: 24, type: float, scopeName: testeOperacao
+Entry 18 -- name: string1, line: 26, type: string, scopeName: testeOperacao
+Entry 19 -- name: string2, line: 27, type: string, scopeName: testeOperacao
+Entry 20 -- name: add3, line: 29, type: string, scopeName: testeOperacao
 
 
 
@@ -32,6 +45,6 @@ Entry 9 -- name: gt, line: 14, type: bool, scopeName: testeOperacao
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  0.793 s
-[INFO] Finished at: 2022-02-24T20:53:44-03:00
+[INFO] Total time:  1.986 s
+[INFO] Finished at: 2022-02-24T21:09:06-03:00
 [INFO] ------------------------------------------------------------------------
