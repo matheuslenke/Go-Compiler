@@ -1092,4 +1092,16 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         return AST.newSubtree(NodeKind.ASSIGN_NODE, Type.NO_TYPE, type);
     }
 
+    public AST getAST() {
+        return this.root;
+    }
+
+    public VarTable getVarTable() {
+        return this.vt;
+    }
+    
+    public StrTable getStrTable() {
+        return this.st;
+    }
+
 }
