@@ -759,14 +759,14 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             VariableData funcVarData = (VariableData) functionAST.getData();
             AST functionDeclNode = vt.getAstNode(funcVarData.getIndex());
 
-            checkParametersTypeFromFunctionCall(functionDeclNode, argumentsAST);
             String textFunc = this.vt.getName(((VariableData) functionAST.getData()).getIndex());
             if ("Println".equals(textFunc)) {
-                return AST.newSubtree(NodeKind.READ_OPERATION, Type.NO_TYPE, functionAST, argumentsAST);
-            }
-            if ("Scanln".equals(textFunc)) {
                 return AST.newSubtree(NodeKind.WRITE_OPERATION, Type.NO_TYPE, functionAST, argumentsAST);
             }
+            if ("Scanln".equals(textFunc)) {
+                return AST.newSubtree(NodeKind.READ_OPERATION, Type.NO_TYPE, functionAST, argumentsAST);
+            }
+            checkParametersTypeFromFunctionCall(functionDeclNode, argumentsAST);
             return AST.newSubtree(NodeKind.FUNC_USE_NODE, Type.NO_TYPE, functionAST, argumentsAST);
 
         } else {

@@ -51,8 +51,8 @@ public class GoCompiler {
     checker.visit(tree);
 
     System.out.println("PARSE SUCCESSFUL");
-    // checker.printTables();
-    // checker.printAST();
+    checker.printTables();
+    checker.printAST();
 
     // TreeViewer viewr = new TreeViewer(Arrays.asList(
     // parser.getRuleNames()), tree);

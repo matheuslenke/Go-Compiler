@@ -5,8 +5,17 @@ import static br.ufes.edu.compiladores.code.Instruction.INSTR_MEM_SIZE;
 import br.ufes.edu.compiladores.ast.AST;
 import br.ufes.edu.compiladores.tables.StrTable;
 import br.ufes.edu.compiladores.tables.VarTable;
+import br.ufes.edu.compiladores.typing.Type;
 import br.ufes.edu.compiladores.ast.ASTBaseVisitor;
+import br.ufes.edu.compiladores.ast.NodeKind;
+import br.ufes.edu.compiladores.ast.VariableData;
+
 import static br.ufes.edu.compiladores.code.OpCode.HALT;
+import static br.ufes.edu.compiladores.code.OpCode.SYSCALL;
+import static br.ufes.edu.compiladores.code.OpCode.MOVE;
+import static br.ufes.edu.compiladores.code.OpCode.LOAD_INTEGER;
+import static br.ufes.edu.compiladores.code.OpCode.LOAD_ADDRESS;
+import static br.ufes.edu.compiladores.code.OpCode.CODE;
 
 import java.util.Optional;
 
@@ -22,12 +31,14 @@ import java.util.Optional;
  */
 public class CodeGen extends ASTBaseVisitor<Integer> {
     private final Instruction code[]; // Code memory
+    private final MipsData dataSection[];
 	private final StrTable st;
 	private final VarTable vt;
 	
 	// Contadores para geração de código.
 	// Próxima posição na memória de código para emit.
 	private static int nextInstr;
+	private static int nextData;
 	// Número de registradores temporários já utilizados.
 	// Usamos um valor arbitrário, mas depois seria necessário
 	// fazer o processo de alocação de registradores. Isto está
@@ -37,6 +48,7 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
 	
 	public CodeGen(StrTable st, VarTable vt) {
 		this.code = new Instruction[INSTR_MEM_SIZE];
+        this.dataSection = new MipsData[INSTR_MEM_SIZE];
 		this.st = st;
 		this.vt = vt;
 	}
@@ -45,11 +57,13 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
 	@Override
 	public void execute(AST root) {
 		nextInstr = 0;
-		intRegsCount = 0;
+		intRegsCount = 4;
 		floatRegsCount = 0;
+        nextData = 0;
 	    dumpStrTable();
+        emit(CODE);
+        emitData(OpCode.DATA, "");
 	    visit(root);
-	    emit(HALT);
 	    dumpProgram();
 	}
 	
@@ -57,6 +71,9 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
 	// Prints ---------------------------------------------------------------------
 
 	void dumpProgram() {
+	    for (int addr = 0; addr < nextData; addr++) {
+	    	System.out.printf("%s\n", dataSection[addr].toString());
+	    }
 	    for (int addr = 0; addr < nextInstr; addr++) {
 	    	System.out.printf("%s\n", code[addr].toString());
 	    }
@@ -64,14 +81,20 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
 
 	void dumpStrTable() {
 	    for (int i = 0; i < st.getSize(); i++) {
-	        System.out.printf("SSTR %s\n", st.get(i));
+	        System.out.printf(".asciiz %s\n", st.get(i));
 	    }
 	}
 	
 	// ----------------------------------------------------------------------------
 	// Emits ----------------------------------------------------------------------
+
+    private void emitData(OpCode op, String data) {
+        MipsData newData = new MipsData(op, data);
+        dataSection[nextData] = newData;
+        nextData++;
+    }
 	
-	private void emit(OpCode op, int o1, int o2, int o3) {
+	private void emit(OpCode op, String o1, String o2, String o3) {
 		Instruction instr = new Instruction(op, o1, o2, o3);
 		// Em um código para o produção deveria haver uma verificação aqui...
 	    code[nextInstr] = instr;
@@ -79,23 +102,23 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
 	}
 	
 	private void emit(OpCode op) {
-		emit(op, 0, 0, 0);
+		emit(op, "", "", "");
 	}
 	
-	private void emit(OpCode op, int o1) {
-		emit(op, o1, 0, 0);
+	private void emit(OpCode op, String o1) {
+		emit(op, o1, "", "");
 	}
 	
-	private void emit(OpCode op, int o1, int o2) {
-		emit(op, o1, o2, 0);
+	private void emit(OpCode op, String o1, String o2) {
+		emit(op, o1, o2, "");
 	}
 
-	private void backpatchJump(int instrAddr, int jumpAddr) {
-	    code[instrAddr].o1 = jumpAddr;
+	private void backpatchJump(String instrAddr, String jumpAddr) {
+	    code[Integer.parseInt(instrAddr)].o1 = jumpAddr;
 	}
 
-	private void backpatchBranch(int instrAddr, int offset) {
-	    code[instrAddr].o2 = offset;
+	private void backpatchBranch(String instrAddr, String offset) {
+	    code[Integer.parseInt(instrAddr)].o2 = offset;
 	}
 	
 	// ----------------------------------------------------------------------------
@@ -120,7 +143,37 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
             childOpt = node.getChild(idx);
             visit(childOpt.get());
         }
-        return null;
+        return -1;
+    }
+
+    @Override
+    protected Integer visitImportSpec(AST node) {
+        return -1;
+    }
+    
+    @Override
+    protected Integer visitFuncUse(AST node) {
+        Optional<AST> childOpt = node.getChild(0);
+        visit(childOpt.get()); // Visitando os parâmetros
+
+        childOpt = node.getChild(1);
+        visit(childOpt.get()); // Visitando o bloco de código
+        return -1;
+    }
+
+    @Override
+    protected Integer visitFuncDecl(AST node) {
+        Optional<AST> childOpt = node.getChild(0);
+        visit(childOpt.get()); // Visitando os parâmetros
+
+        childOpt = node.getChild(1);
+        visit(childOpt.get()); // Visitando o bloco de código
+        return -1;
+    }
+
+    @Override
+    protected Integer visitParameters(AST node) {
+        return -1;
     }
 
     @Override
@@ -137,8 +190,14 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
 
     @Override
     protected Integer visitBlock(AST node) {
-        // TODO Auto-generated method stub
-        return null;
+        Integer idx;
+        Optional<AST> childOpt;
+
+        for(idx = 1; idx < node.getChildren().size(); idx++ )  {
+            childOpt = node.getChild(idx);
+            visit(childOpt.get());
+        }
+        return -1;
     }
 
     @Override
@@ -184,15 +243,31 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
     }
 
     @Override
-    protected Integer visitProgram(AST node) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     protected Integer visitRead(AST node) {
-        // TODO Auto-generated method stub
-        return null;
+        AST var = node.getChild(1).get().getChild(0).get();
+        VariableData varData = (VariableData) var.getData();
+	    int addr = varData.getIndex();
+	    int x;
+	    if (var.getType() == Type.INT_TYPE) {
+	    	x = newIntReg();
+            emit(LOAD_INTEGER, "$v0", "5");
+	        emit(SYSCALL);
+	        emit(MOVE, "$" + Integer.toString(x), "$v0");
+	    }
+        //  else if (var.getType() == Type.REAL_TYPE) {
+	    //     x = newFloatReg();
+	    //     emit(CALL, 1, x);
+	    //     emit(STWf, addr, x);
+	    // } else if (var.getType() == Type.BOOL_TYPE) {
+	    // 	x = newIntReg();
+	    //     emit(CALL, 2, x);
+	    //     emit(STWi, addr, x);
+	    // } else { // Must be STR_TYPE
+	    // 	x = newIntReg();
+	    //     emit(CALL, 3, x);
+	    //     emit(STWi, addr, x);
+	    // }
+	    return -1;  // This is not an expression, hence no value to return.
     }
 
     @Override
@@ -227,8 +302,20 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
 
     @Override
     protected Integer visitVarList(AST node) {
-        // TODO Auto-generated method stub
-        return null;
+        Integer idx;
+        Optional<AST> childOpt;
+
+        for(idx = 1; idx < node.getChildren().size(); idx++ )  {
+            childOpt = node.getChild(idx);
+
+            if(childOpt.get().getKind() == NodeKind.ASSIGN_NODE ) {
+                
+            } else {
+                visit(childOpt.get());
+            }
+        }
+
+        return -1;
     }
 
     @Override

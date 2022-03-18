@@ -52,8 +52,8 @@ public enum NodeKind {
     RESULT_NODE("result"),
     PARAMETER_DECLARATION("parameter_declaration"),
     RETURN_NODE("return"),
-    READ_OPERATION("write"),
-    WRITE_OPERATION("read"),
+    READ_OPERATION("read"),
+    WRITE_OPERATION("write"),
 
     // Declarações de Tipo
     TYPE_DECLARATION("type_declaration"),

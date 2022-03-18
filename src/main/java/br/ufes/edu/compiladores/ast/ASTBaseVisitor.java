@@ -23,6 +23,7 @@ public abstract class ASTBaseVisitor<T> {
 	// código todo espalhado entre elas...
 	protected T visit(AST node) {
 		switch(node.getKind()) {
+	        case SOURCE_FILE:  return visitSourceFile(node);
 	        case ASSIGN_NODE:   return visitAssign(node);
 	        case EQ_NODE:       return visitEq(node);
 	        case CODE_BLOCK:    return visitBlock(node);
@@ -33,8 +34,7 @@ public abstract class ASTBaseVisitor<T> {
 	        case MINUS_NODE:    return visitMinus(node);
 	        case OVER_NODE:     return visitOver(node);
 	        case PLUS_NODE:     return visitPlus(node);
-	        case SOURCE_FILE:  return visitSourceFile(node);
-	        // case READ_NODE:     return visitRead(node);
+	        case READ_OPERATION:     return visitRead(node);
 	        case REAL_VAL_NODE: return visitRealVal(node);
 	        // case REPEAT_NODE:   return visitRepeat(node);
 	        case STR_VAL_NODE:  return visitStrVal(node);
@@ -43,6 +43,10 @@ public abstract class ASTBaseVisitor<T> {
 	        case VAR_LIST_NODE: return visitVarList(node);
 	        case VAR_USE_NODE:  return visitVarUse(node);
 	        case WRITE_OPERATION:    return visitWrite(node);
+			case FUNC_USE_NODE:		return visitFuncUse(node);
+			case FUNC_DECL_NODE:		return visitFuncDecl(node);
+			case PARAMETERS_NODE:		return visitParameters(node);
+			case IMPORT_SPEC:	return visitImportSpec(node);
 	
 	        // case B2I_NODE:      return visitB2I(node);
 	        // case B2R_NODE:      return visitB2R(node);
@@ -61,6 +65,12 @@ public abstract class ASTBaseVisitor<T> {
 	// Métodos especializados para visitar um nó com um certo 'kind'.
 
     protected abstract T visitSourceFile(AST node);
+
+	protected abstract T visitImportSpec(AST node);
+	
+    protected abstract T visitFuncUse(AST node);
+    protected abstract T visitFuncDecl(AST node);
+    protected abstract T visitParameters(AST node);
 
 	protected abstract T visitAssign(AST node);
 
@@ -81,8 +91,6 @@ public abstract class ASTBaseVisitor<T> {
 	protected abstract T visitOver(AST node);
 
 	protected abstract T visitPlus(AST node);
-
-	protected abstract T visitProgram(AST node);
 
 	protected abstract T visitRead(AST node);
 

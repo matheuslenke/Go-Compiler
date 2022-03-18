@@ -2,20 +2,16 @@ package br.ufes.edu.compiladores.code;
 
 import java.util.Formatter;
 
-// Instruction quadruple.
-public class Instruction {
+public class MipsData {
     // Público para não precisar de getter/setter.
 	public final OpCode op;
 	// Estes campos não podem ser final por causa do backpatching...
-	public String o1;	// Operands, which can be int or float registers,
-	public String o2;	// int addresses or offsets, or
-	public String o3;	// integer or float constants (must be in an integer repr.)
+	public String data;	// Operands, which can be int or float registers,
 
-	public Instruction(OpCode op, String o1, String o2, String o3) {
-		this.op = op;
-		this.o1 = o1;
-		this.o2 = o2;
-		this.o3 = o3;
+	public MipsData(OpCode dataType, String data) {
+		this.op = dataType;
+		this.data = data;
+
 	}
 	
 	public String toString() {
@@ -23,11 +19,7 @@ public class Instruction {
 		Formatter f = new Formatter(sb);
 		f.format("%s", this.op);
 		if (this.op.opCount == 1) {
-			f.format(" %s", this.o1);
-		} else if (this.op.opCount == 2) {
-			f.format(" %s, %s", this.o1, this.o2);
-		} else if (this.op.opCount == 3) {
-			f.format(" %s, %s, %s", this.o1, this.o2, this.o3);
+			f.format(" %s", this.data);
 		}
 		f.close();
 		return sb.toString();
