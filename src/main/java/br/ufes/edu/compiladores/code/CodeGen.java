@@ -238,7 +238,7 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
             emit(OpCode.STORE_WORD, "$" + Integer.toString(x), varLabel);
         }  
         else if (varType == Type.FLOAT_TYPE) { 
-            emit(OpCode.STORE_WORD_C1, "$" + Integer.toString(x), varLabel);
+            emit(OpCode.STORE_WORD_C1, "$f" + Integer.toString(x), varLabel);
         }
         else if (varType == Type.STR_TYPE || varType == Type.BOOL_TYPE) { 
             emit(OpCode.STORE_WORD, "$" + Integer.toString(x), varLabel);
@@ -430,21 +430,38 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
             emit(OpCode.LOAD_INTEGER, "$v0", "5");
             emit(OpCode.SYSCALL);
             emit(OpCode.STORE_WORD,"$v0", varName);
+        } else if (var.getType() == Type.FLOAT_TYPE) {
+            String varName = vt.getName(addr);
+            x = newIntReg();
+            emit(OpCode.LOAD_INTEGER, "$v0", "6");
+            emit(OpCode.SYSCALL);
+            emit(OpCode.STORE_WORD_C1,"$f0", varName);
+        } else if (var.getType() == Type.BOOL_TYPE) {
+
+        } else if (var.getType() == Type.STR_TYPE) {
+
         }
-        // else if (var.getType() == Type.REAL_TYPE) {
-        // x = newFloatReg();
-        // emit(CALL, 1, x);
-        // emit(STWf, addr, x);
-        // } else if (var.getType() == Type.BOOL_TYPE) {
-        // x = newIntReg();
-        // emit(CALL, 2, x);
-        // emit(STWi, addr, x);
-        // } else { // Must be STR_TYPE
-        // x = newIntReg();
-        // emit(CALL, 3, x);
-        // emit(STWi, addr, x);
-        // }
         return -1; // This is not an expression, hence no value to return.
+    }
+
+    @Override
+    protected Integer visitWrite(AST node) {
+        AST var = node.getChild(1).get().getChild(0).get();
+        if(var.getKind() == NodeKind.VAR_USE_NODE) {
+            VariableData varData = (VariableData) var.getData();
+            int addr = varData.getIndex();
+            int x;
+            if (var.getType() == Type.INT_TYPE) {
+                String varName = vt.getName(addr);
+                x = newIntReg();
+                    emit(OpCode.LOAD_WORD,"$a0", varName);
+                    emit(OpCode.LOAD_INTEGER, "$v0", "1");
+                    emit(OpCode.SYSCALL);
+            }
+        } else {
+
+        }
+        return -1;
     }
 
     @Override
@@ -515,11 +532,7 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
         return null;
     }
 
-    @Override
-    protected Integer visitWrite(AST node) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+
 
     @Override
     protected Integer visitB2I(AST node) {

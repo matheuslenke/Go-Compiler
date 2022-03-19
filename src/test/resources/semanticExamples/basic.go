@@ -10,6 +10,7 @@ func main() {
 	var verdadeiro bool = true
 
 	fmt.Scanln(inteiro)
+	fmt.Println(inteiro)
 }
 
 
