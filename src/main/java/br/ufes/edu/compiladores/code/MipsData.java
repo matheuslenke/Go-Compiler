@@ -6,20 +6,29 @@ public class MipsData {
     // Público para não precisar de getter/setter.
 	public final OpCode op;
 	// Estes campos não podem ser final por causa do backpatching...
-	public String data;	// Operands, which can be int or float registers,
+	public String name;	// Operands, which can be int or float registers,
+	public String value;
 
-	public MipsData(OpCode dataType, String data) {
+	public MipsData(OpCode dataType, String name, String value) {
 		this.op = dataType;
-		this.data = data;
+		this.name = name;
+		this.value = value;
 
 	}
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		Formatter f = new Formatter(sb);
-		f.format("%s", this.op);
-		if (this.op.opCount == 1) {
-			f.format(" %s", this.data);
+		if (this.op == OpCode.DATA) {
+			f.format("%s", this.op);
+		} else {
+			f.format("%s: ", this.name);
+			if(this.op.opCount == 1) {
+	
+			}
+			else if (this.op.opCount == 2) {
+				f.format("%s %s", this.op, this.value);
+			}
 		}
 		f.close();
 		return sb.toString();

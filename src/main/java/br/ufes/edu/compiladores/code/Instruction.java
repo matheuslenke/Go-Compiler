@@ -21,13 +21,17 @@ public class Instruction {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		Formatter f = new Formatter(sb);
-		f.format("%s", this.op);
-		if (this.op.opCount == 1) {
-			f.format(" %s", this.o1);
-		} else if (this.op.opCount == 2) {
-			f.format(" %s, %s", this.o1, this.o2);
-		} else if (this.op.opCount == 3) {
-			f.format(" %s, %s, %s", this.o1, this.o2, this.o3);
+		if(op == OpCode.LABEL) {
+			f.format("%s:", this.o1);
+		} else {
+			f.format(" %s", this.op);
+			if (this.op.opCount == 1) {
+				f.format(" %s", this.o1);
+			} else if (this.op.opCount == 2) {
+				f.format(" %s, %s", this.o1, this.o2);
+			} else if (this.op.opCount == 3) {
+				f.format(" %s, %s, %s", this.o1, this.o2, this.o3);
+			}
 		}
 		f.close();
 		return sb.toString();
