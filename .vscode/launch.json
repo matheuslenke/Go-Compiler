@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "br.ufes.edu.compiladores.GoCompiler",
             "projectName": "go-compiler",
-            "args": "src/test/resources/generatedCodeExamples/loop.go"
+            "args": "src/test/resources/generatedCodeExamples/calculator.go"
         }
     ]
 }

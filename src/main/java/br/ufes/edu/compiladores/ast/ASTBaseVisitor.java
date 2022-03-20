@@ -24,6 +24,7 @@ public abstract class ASTBaseVisitor<T> {
 	protected T visit(AST node) {
 		switch(node.getKind()) {
 	        case SOURCE_FILE:  return visitSourceFile(node);
+			case ASSIGN_LIST_NODE: return visitAssignList(node);
 	        case ASSIGN_NODE:   return visitAssign(node);
 	        case CODE_BLOCK:    return visitBlock(node);
 	        case BOOL_VAL_NODE: return visitBoolVal(node);
@@ -34,6 +35,7 @@ public abstract class ASTBaseVisitor<T> {
 	        case LTE_NODE:       return visitLte(node);
 	        case GTE_NODE:       return visitGte(node);
 	        case GT_NODE:       return visitGt(node);
+	        case DIFF_NODE:       return visitDiff(node);
 	        case MINUS_NODE:    return visitMinus(node);
 	        case OVER_NODE:     return visitOver(node);
 	        case PLUS_NODE:     return visitPlus(node);
@@ -80,14 +82,18 @@ public abstract class ASTBaseVisitor<T> {
 	protected abstract T visitArguments(AST node);
 		
 	
+	protected abstract T visitAssign(AST node);
+	protected abstract T visitAssignList(AST node);
+
 	// Comparações
 
 	protected abstract T visitLt(AST node);
 	protected abstract T visitGt(AST node);
 	protected abstract T visitLte(AST node);
 	protected abstract T visitGte(AST node);
-	protected abstract T visitAssign(AST node);
 	protected abstract T visitEq(AST node);
+	protected abstract T visitDiff(AST node);
+	
 
 	protected abstract T visitIntVal(AST node);
 	protected abstract T visitStrVal(AST node);

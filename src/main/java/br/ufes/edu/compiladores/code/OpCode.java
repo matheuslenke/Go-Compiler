@@ -26,6 +26,7 @@ public enum OpCode {
     LTE("sle", 3),
     GTE("sge", 3),
     EQ("seq", 3),
+    DIFF("sneq", 3),
 	STORE_WORD("sw", 2),
 	STORE_WORD_C1("swc1", 2),
     MUL_F("mul.d", 3),

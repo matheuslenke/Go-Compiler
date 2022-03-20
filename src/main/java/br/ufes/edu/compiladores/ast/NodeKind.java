@@ -15,6 +15,7 @@ public enum NodeKind {
     GT_NODE(">"),
     LTE_NODE("<="),
     GTE_NODE(">="),
+    DIFF_NODE("!="),
     MINUS_NODE("-"),
     OVER_NODE("/"),
     PLUS_NODE("+"),

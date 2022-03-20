@@ -40,7 +40,9 @@ public class Instruction {
 	// Constantes
 	
 	// Basic arch: 32 int registers and 32 float registers.
-	public static final int INT_REGS_COUNT   = 32;  // i0 to i31: int registers.
+	public static final int FIRST_INT_REG_NUMBER  = 8;  // i0 to i31: int registers.
+	public static final int INT_REGS_COUNT   = 18;  // i0 to i31: int registers.
+	public static final int FIRST_FLOAT_REG_NUMBER  = 0;  // i0 to i31: int registers.
 	public static final int FLOAT_REGS_COUNT = 32;	// f0 to f31: float registers.
 	// The machine also has a dedicated program counter (PC) register.
 

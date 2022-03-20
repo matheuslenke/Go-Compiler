@@ -33,6 +33,7 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
     private final MipsData dataSection[];
     private final StrTable st;
     private final VarTable vt;
+    private final String filename;
 
     // Contadores para geração de código.
     // Próxima posição na memória de código para emit.
@@ -45,18 +46,19 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
     private static int intRegsCount;
     private static int floatRegsCount;
 
-    public CodeGen(StrTable st, VarTable vt) {
+    public CodeGen(StrTable st, VarTable vt, String filename) {
         this.code = new Instruction[INSTR_MEM_SIZE];
         this.dataSection = new MipsData[INSTR_MEM_SIZE];
         this.st = st;
         this.vt = vt;
+        this.filename = filename;
     }
 
     // Função principal para geração de código.
     @Override
     public void execute(AST root) {
         nextInstr = 0;
-        intRegsCount = 4;
+        intRegsCount = Instruction.FIRST_INT_REG_NUMBER;
         floatRegsCount = 0;
         nextData = 0;
         emitData(OpCode.DATA, "", "");
@@ -154,11 +156,21 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
     // AST Traversal --------------------------------------------------------------
 
     private int newIntReg() {
-        return intRegsCount++;
+        if (intRegsCount < Instruction.FIRST_INT_REG_NUMBER + Instruction.INT_REGS_COUNT) {
+            return intRegsCount++;
+        } else {
+            intRegsCount = Instruction.FIRST_INT_REG_NUMBER;
+            return intRegsCount;
+        }
     }
 
     private int newFloatReg() {
-        return floatRegsCount++;
+        if (floatRegsCount <= Instruction.FIRST_FLOAT_REG_NUMBER + Instruction.FLOAT_REGS_COUNT) {
+            return floatRegsCount++;
+        } else {
+            floatRegsCount = Instruction.FIRST_FLOAT_REG_NUMBER;
+            return floatRegsCount;
+        }
     }
 
     private void backpatchJump(int instrAddr, int jumpAddr) {
@@ -228,6 +240,18 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
     }
 
     @Override
+    protected Integer visitAssignList(AST node) {
+        Integer idx;
+        Optional<AST> childOpt;
+
+        for (idx = 0; idx < node.getChildren().size(); idx++) {
+            childOpt = node.getChild(idx);
+            visit(childOpt.get());
+        }
+        return -1;
+    }
+
+    @Override
     protected Integer visitAssign(AST node) {
         AST r = node.getChild(1).get();
         int x = visit(r);
@@ -249,6 +273,17 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
 
     @Override
     protected Integer visitEq(AST node) {
+        AST l = node.getChild(0).get();
+        AST r = node.getChild(1).get();
+        int y = visit(l);
+        int z = visit(r);
+        int x = newIntReg();
+        emit(OpCode.EQ, "$" + x, "$" + y, "$" + z);
+        return x;
+    }
+
+    @Override
+    protected Integer visitDiff(AST node) {
         AST l = node.getChild(0).get();
         AST r = node.getChild(1).get();
         int y = visit(l);
@@ -287,16 +322,22 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
         // Code for test.
         int testReg = visit(node.getChild(0).get());
 
-        emit(OpCode.BRANCH_IF_EQUAL, "$" + testReg, "$zero", "fimTrueBlock" + testReg);
-
+        if (node.getChild(0).get().getKind() == NodeKind.DIFF_NODE) {
+            emit(OpCode.BRANCH_IF_NOT_EQUAL, "$" + testReg, "$zero", "fimTrueBlock" + testReg);
+        } else {
+            emit(OpCode.BRANCH_IF_EQUAL, "$" + testReg, "$zero", "fimTrueBlock" + testReg);
+        }
         // Code for TRUE block.
         visit(node.getChild(1).get()); // Generate TRUE block.
 
         emit(OpCode.LABEL, "fimTrueBlock" + testReg);
 
         // Code for FALSE block
-        emit(OpCode.BRANCH_IF_NOT_EQUAL, "$" + testReg, "$zero", "fimIf" + testReg);
-
+        if (node.getChild(0).get().getKind() == NodeKind.DIFF_NODE) {
+            emit(OpCode.BRANCH_IF_EQUAL, "$" + testReg, "$zero", "fimIf" + testReg);
+        } else {
+            emit(OpCode.BRANCH_IF_NOT_EQUAL, "$" + testReg, "$zero", "fimIf" + testReg);
+        }
         if (node.getChild(2).isPresent()) { // We have an else.
             visit(node.getChild(2).get()); // Generate FALSE block.
         }
@@ -525,17 +566,24 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
     protected Integer visitFor(AST node) {
         // Code for test.
         int currentReg = nextInstr;
-        emit(OpCode.LABEL, "for" + currentReg);
+        String forStartLabel = "for" + currentReg;
+        String forEndLabel = "fimFor" + currentReg;
+
+        emit(OpCode.LABEL, forStartLabel);
         int testReg = visit(node.getChild(0).get());
 
-        emit(OpCode.BRANCH_IF_EQUAL, "$" + testReg, "$zero", "fimFor" + currentReg);
+        if (node.getChild(0).get().getKind() == NodeKind.DIFF_NODE) {
+            emit(OpCode.BRANCH_IF_NOT_EQUAL, "$" + testReg, "$zero", forEndLabel);
+        } else {
+            emit(OpCode.BRANCH_IF_EQUAL, "$" + testReg, "$zero", forEndLabel);
+        }
 
         // Code for TRUE block.
         visit(node.getChild(1).get()); // Generate TRUE block.
 
-        emit(OpCode.JUMP, "for" + currentReg);
+        emit(OpCode.JUMP, forStartLabel);
 
-        emit(OpCode.LABEL, "fimFor" + currentReg);
+        emit(OpCode.LABEL, forEndLabel);
 
         return -1; // This is not an expression, hence no value to return.
     }

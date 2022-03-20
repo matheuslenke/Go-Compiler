@@ -59,7 +59,7 @@ public class GoCompiler {
     // viewr.open();
 
 		// Executa o gerador de código.
-		CodeGen codeGen = new CodeGen(checker.getStrTable(), checker.getVarTable());
+		CodeGen codeGen = new CodeGen(checker.getStrTable(), checker.getVarTable(), args[0]);
 		codeGen.execute(checker.getAST());
 
   }
