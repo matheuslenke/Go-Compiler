@@ -319,6 +319,14 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             }
         }
 
+        final Integer index = vt.lookupVar("main");
+        if (index == -1) {
+            System.out.println(
+                    "SEMANTIC ERROR: main function was not declared.\n");
+            System.exit(1);
+
+        }
+
         return this.root;
     }
 

@@ -16,6 +16,9 @@ import br.ufes.edu.compiladores.ast.VariableData;
 
 import br.ufes.edu.compiladores.code.OpCode;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Optional;
 
 /*
@@ -51,7 +54,7 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
         this.dataSection = new MipsData[INSTR_MEM_SIZE];
         this.st = st;
         this.vt = vt;
-        this.filename = filename;
+        this.filename = filename.replace(".go", ".asm");
     }
 
     // Função principal para geração de código.
@@ -66,31 +69,45 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
         emit(OpCode.CODE);
         emit(OpCode.JUMP, "main");
         visit(root);
-        dumpVarTable();
-        dumpStrTable();
-        dumpProgram();
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(this.filename));
+            dumpVarTable(writer);
+            dumpStrTable(writer);
+            dumpProgram(writer);
+            writer.close();
+        } catch (Exception e) {
+            System.out.println("Erro ao escrever arquivo: " + this.filename);
+            System.exit(1);
+        }
     }
 
     // ----------------------------------------------------------------------------
     // Prints ---------------------------------------------------------------------
 
-    void dumpProgram() {
-        System.out.printf("\n");
+    void dumpProgram(BufferedWriter writer) throws IOException {
+
         for (int addr = 0; addr < nextInstr; addr++) {
-            System.out.printf("%s\n", code[addr].toString());
+            String str = String.format("%s\n", code[addr].toString());
+            // System.out.printf("%s\n", code[addr].toString());
+            writer.write(str);
         }
+        
     }
-
-    void dumpStrTable() {
+    
+    void dumpStrTable(BufferedWriter writer) throws IOException {
         for (int i = 0; i < st.getSize(); i++) {
-            System.out.printf("string" + i + ": .asciiz \"%s\"\n", st.get(i));
+            String str = String.format("string" + i + ": .asciiz \"%s\"\n", st.get(i));
+            // System.out.printf("string" + i + ": .asciiz \"%s\"\n", st.get(i));
+            writer.write(str);
         }
     }
-
-    void dumpVarTable() {
+    
+    void dumpVarTable(BufferedWriter writer) throws IOException {
         checkVarTable();
         for (int addr = 0; addr < nextData; addr++) {
-            System.out.printf("%s\n", dataSection[addr].toString());
+            String str = String.format("%s\n", dataSection[addr].toString());
+            // System.out.printf("%s\n", dataSection[addr].toString());
+            writer.write(str);
         }
     }
 

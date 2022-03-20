@@ -2,7 +2,7 @@ package samples
 
 import fmt "fmt"
 
-func main() {
+func read() {
 	var flutuante float32 = 15.20
 	fmt.Println(flutuante)
 	fmt.Println(20.35)

@@ -16,9 +16,9 @@ func main() {
 	}
 	
 	if false {
-		fmt.Println("Falso literal")
+		fmt.Println("Falso literal deu verdadeiro")
 	} else {
-		fmt.Println("Falso literal vai para o else")
+		fmt.Println("Falso literal deu falso")
 	}
 }
 
