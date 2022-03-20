@@ -292,7 +292,7 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
         // Code for TRUE block.
         visit(node.getChild(1).get()); // Generate TRUE block.
 
-        emit(OpCode.LABEL, "fimTrueBlock");
+        emit(OpCode.LABEL, "fimTrueBlock" + testReg);
 
         // Code for FALSE block
         emit(OpCode.BRANCH_IF_NOT_EQUAL, "$" + testReg, "$zero", "fimIf" + testReg);
@@ -423,23 +423,29 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
         AST var = node.getChild(1).get().getChild(0).get();
         VariableData varData = (VariableData) var.getData();
         int addr = varData.getIndex();
-        int x;
         if (var.getType() == Type.INT_TYPE) {
             String varName = vt.getName(addr);
-            x = newIntReg();
             emit(OpCode.LOAD_INTEGER, "$v0", "5");
             emit(OpCode.SYSCALL);
             emit(OpCode.STORE_WORD,"$v0", varName);
         } else if (var.getType() == Type.FLOAT_TYPE) {
             String varName = vt.getName(addr);
-            x = newIntReg();
             emit(OpCode.LOAD_INTEGER, "$v0", "6");
             emit(OpCode.SYSCALL);
             emit(OpCode.STORE_WORD_C1,"$f0", varName);
         } else if (var.getType() == Type.BOOL_TYPE) {
-
+            String varName = vt.getName(addr);
+            emit(OpCode.LOAD_INTEGER, "$v0", "6");
+            emit(OpCode.SYSCALL);
+            emit(OpCode.STORE_WORD,"$v0", varName);
         } else if (var.getType() == Type.STR_TYPE) {
-
+            String varName = vt.getName(addr);
+            emitData(OpCode.STRING_DATA, varName + "str", "\"                              \"");
+            emit(OpCode.LOAD_INTEGER, "$v0", "8");
+            emit(OpCode.LOAD_INTEGER, "$a1", "30");
+            emit(OpCode.LOAD_ADDRESS, "$a0", varName + "str");
+            emit(OpCode.SYSCALL);
+            emit(OpCode.STORE_WORD,"$a0", varName);
         }
         return -1; // This is not an expression, hence no value to return.
     }
@@ -450,16 +456,58 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
         if(var.getKind() == NodeKind.VAR_USE_NODE) {
             VariableData varData = (VariableData) var.getData();
             int addr = varData.getIndex();
-            int x;
-            if (var.getType() == Type.INT_TYPE) {
+            if (var.getType() == Type.INT_TYPE || var.getType() == Type.BOOL_TYPE) {
                 String varName = vt.getName(addr);
-                x = newIntReg();
-                    emit(OpCode.LOAD_WORD,"$a0", varName);
-                    emit(OpCode.LOAD_INTEGER, "$v0", "1");
-                    emit(OpCode.SYSCALL);
+                emit(OpCode.LOAD_WORD,"$a0", varName);
+                emit(OpCode.LOAD_INTEGER, "$v0", "1");
+                emit(OpCode.SYSCALL);
+                return -1;
+            }
+            if (var.getType() == Type.STR_TYPE) {
+                String varName = vt.getName(addr);
+                emit(OpCode.LOAD_WORD, "$a0", varName);
+                emit(OpCode.LOAD_INTEGER, "$v0", "4");
+                emit(OpCode.SYSCALL);
+                return -1;
+            }
+            if (var.getType() == Type.FLOAT_TYPE) {
+                String varName = vt.getName(addr);
+                emit(OpCode.LOAD_FLOAT,"$f12", varName);
+                emit(OpCode.LOAD_INTEGER, "$v0", "2");
+                emit(OpCode.SYSCALL);
+                return -1;
             }
         } else {
-
+            if (var.getType() == Type.INT_TYPE) {
+                IntData intData = (IntData) var.getData();
+                emit(OpCode.LOAD_INTEGER, "$a0", Integer.toString(intData.getValue()));
+                emit(OpCode.LOAD_INTEGER, "$v0", "1");
+                emit(OpCode.SYSCALL);
+                return -1;
+            }
+            if (var.getType() == Type.STR_TYPE) {
+                StringData strData = (StringData) var.getData();
+                int addr = strData.getValue();
+                emit(OpCode.LOAD_ADDRESS,"$a0", "string" + Integer.toString(addr));
+                emit(OpCode.LOAD_INTEGER, "$v0", "4");
+                emit(OpCode.SYSCALL);
+                return -1;
+            }
+            if (var.getType() == Type.FLOAT_TYPE) {
+                int x = visit(node.getChild(1).get().getChild(0).get());
+                emit(OpCode.LOAD_FLOAT,"$f12", "floatVar" + Integer.toString(x));
+                emit(OpCode.LOAD_INTEGER, "$v0", "2");
+                emit(OpCode.SYSCALL);
+                return x;
+            }
+            if (var.getType() == Type.BOOL_TYPE) {
+                BoolData boolData = (BoolData) var.getData();
+                int data = boolData.getValue() == true ? 1 : 0;
+                emit(OpCode.LOAD_INTEGER,"$a0", Integer.toString(data));
+                emit(OpCode.LOAD_INTEGER, "$v0", "1");
+                emit(OpCode.SYSCALL);
+                return -1;
+            }
         }
         return -1;
     }
@@ -480,14 +528,14 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
         emit(OpCode.LABEL, "for" + currentReg);
         int testReg = visit(node.getChild(0).get());
 
-        emit(OpCode.BRANCH_IF_EQUAL, "$" + testReg, "$zero", "fimFor" + testReg);
+        emit(OpCode.BRANCH_IF_EQUAL, "$" + testReg, "$zero", "fimFor" + currentReg);
 
         // Code for TRUE block.
         visit(node.getChild(1).get()); // Generate TRUE block.
 
         emit(OpCode.JUMP, "for" + currentReg);
 
-        emit(OpCode.LABEL, "fimFor");
+        emit(OpCode.LABEL, "fimFor" + currentReg);
 
         return -1; // This is not an expression, hence no value to return.
     }
@@ -528,8 +576,26 @@ public class CodeGen extends ASTBaseVisitor<Integer> {
 
     @Override
     protected Integer visitVarUse(AST node) {
-        // TODO Auto-generated method stub
-        return null;
+        Type varType = node.getType();
+        if (varType == Type.INT_TYPE) {
+            VariableData varData = (VariableData) node.getData();
+            int x = newIntReg();
+            String varName = vt.getName(varData.getIndex());
+            emit(OpCode.LOAD_WORD, "$" + Integer.toString(x), varName);
+            return x;
+
+        } else if (varType == Type.BOOL_TYPE) {
+            VariableData varData = (VariableData) node.getData();
+            int x = newIntReg();
+            String varName = vt.getName(varData.getIndex());
+            emit(OpCode.LOAD_WORD, "$" + Integer.toString(x), varName);
+            return x;
+        } else if (varType == Type.FLOAT_TYPE) {
+
+        } else if (varType == Type.STR_TYPE) {
+
+        }
+        return -1;
     }
 
 

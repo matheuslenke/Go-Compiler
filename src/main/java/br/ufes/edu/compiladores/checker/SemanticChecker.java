@@ -1042,7 +1042,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
         if (ctx.ELSE() != null) {
 
-            final AST elseThenNode = this.visit(ctx.block(0));
+            final AST elseThenNode = this.visit(ctx.block(1));
 
             ifNode.addChildren(elseThenNode);
 
@@ -1061,12 +1061,18 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                     ctx.FOR().getSymbol().getLine()));
             System.exit(1);
         }
-
+        
         final AST exprNode = this.visit(ctx.expression());
-
+        
         final AST forNode = AST.newSubtree(NodeKind.FOR_NODE, Type.NO_TYPE, exprNode);
-
-        forNode.addChildren(this.visit(ctx.block()));
+        
+        if (ctx.block() == null) {
+            System.out.println(String.format("SEMANTIC ERROR (%d): empty loop block",
+                    ctx.FOR().getSymbol().getLine()));
+            System.exit(1);
+        } else {
+            forNode.addChild(this.visit(ctx.block()));
+        }
 
         return forNode;
     }

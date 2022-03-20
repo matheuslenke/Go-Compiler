@@ -25,11 +25,11 @@ public abstract class ASTBaseVisitor<T> {
 		switch(node.getKind()) {
 	        case SOURCE_FILE:  return visitSourceFile(node);
 	        case ASSIGN_NODE:   return visitAssign(node);
-	        case EQ_NODE:       return visitEq(node);
 	        case CODE_BLOCK:    return visitBlock(node);
 	        case BOOL_VAL_NODE: return visitBoolVal(node);
 	        case IF_NODE:       return visitIf(node);
 	        case INT_VAL_NODE:  return visitIntVal(node);
+	        case EQ_NODE:       return visitEq(node);
 	        case LT_NODE:       return visitLt(node);
 	        case LTE_NODE:       return visitLte(node);
 	        case GTE_NODE:       return visitGte(node);
