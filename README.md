@@ -76,4 +76,8 @@ Análise léxica e sintática feita utilizando de gramáticas disponíveis pela 
 
 - Operaçõs de IO básicas sobre stdin e stdout para permitir testes.
 
+## Geração de código
 
+- Geração de código MIPS não funciona com o script runall.sh
+
+- Diversas simplificações realizadas, alguns exemplos possíveis se encontram na pasta `generatedCodeExamples`
