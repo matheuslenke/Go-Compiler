@@ -42,3 +42,5 @@ func main() {
 	fmt.Println("Obrigado! Calculadora de golang para Mips")
 	fmt.Println("Matheus Lenke, Pedro Victor Alves, Igor Sunderhus")
 }
+
+
