@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "br.ufes.edu.compiladores.GoCompiler",
             "projectName": "go-compiler",
-            "args": "src/test/resources/semanticExamples/withErrors/declareImplicitVarWithArray.go"
+            "args": "src/test/resources/generatedCodeExamples/ex.go"
         }
     ]
 }

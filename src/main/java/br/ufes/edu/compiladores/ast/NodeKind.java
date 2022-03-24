@@ -15,6 +15,7 @@ public enum NodeKind {
     GT_NODE(">"),
     LTE_NODE("<="),
     GTE_NODE(">="),
+    DIFF_NODE("!="),
     MINUS_NODE("-"),
     OVER_NODE("/"),
     PLUS_NODE("+"),
@@ -52,8 +53,8 @@ public enum NodeKind {
     RESULT_NODE("result"),
     PARAMETER_DECLARATION("parameter_declaration"),
     RETURN_NODE("return"),
-    READ_OPERATION("write"),
-    WRITE_OPERATION("read"),
+    READ_OPERATION("read"),
+    WRITE_OPERATION("write"),
 
     // Declarações de Tipo
     TYPE_DECLARATION("type_declaration"),

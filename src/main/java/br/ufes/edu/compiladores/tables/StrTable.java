@@ -35,4 +35,8 @@ public final class StrTable {
         return sb.toString();
     }
 
+    public Integer getSize() {
+        return table.size();
+    }
+
 }

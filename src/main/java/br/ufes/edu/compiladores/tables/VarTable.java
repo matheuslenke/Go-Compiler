@@ -85,6 +85,10 @@ public final class VarTable {
         table.get(i).setNode(node);
     }
 
+    public Integer getSize() {
+        return this.table.size();
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);

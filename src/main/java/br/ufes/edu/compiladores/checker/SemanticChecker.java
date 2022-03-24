@@ -319,6 +319,14 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             }
         }
 
+        final Integer index = vt.lookupVar("main");
+        if (index == -1) {
+            System.out.println(
+                    "SEMANTIC ERROR: main function was not declared.\n");
+            System.exit(1);
+
+        }
+
         return this.root;
     }
 
@@ -759,14 +767,14 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
             VariableData funcVarData = (VariableData) functionAST.getData();
             AST functionDeclNode = vt.getAstNode(funcVarData.getIndex());
 
-            checkParametersTypeFromFunctionCall(functionDeclNode, argumentsAST);
             String textFunc = this.vt.getName(((VariableData) functionAST.getData()).getIndex());
             if ("Println".equals(textFunc)) {
-                return AST.newSubtree(NodeKind.READ_OPERATION, Type.NO_TYPE, functionAST, argumentsAST);
-            }
-            if ("Scanln".equals(textFunc)) {
                 return AST.newSubtree(NodeKind.WRITE_OPERATION, Type.NO_TYPE, functionAST, argumentsAST);
             }
+            if ("Scanln".equals(textFunc)) {
+                return AST.newSubtree(NodeKind.READ_OPERATION, Type.NO_TYPE, functionAST, argumentsAST);
+            }
+            checkParametersTypeFromFunctionCall(functionDeclNode, argumentsAST);
             return AST.newSubtree(NodeKind.FUNC_USE_NODE, Type.NO_TYPE, functionAST, argumentsAST);
 
         } else {
@@ -1042,7 +1050,7 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
 
         if (ctx.ELSE() != null) {
 
-            final AST elseThenNode = this.visit(ctx.block(0));
+            final AST elseThenNode = this.visit(ctx.block(1));
 
             ifNode.addChildren(elseThenNode);
 
@@ -1061,12 +1069,18 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
                     ctx.FOR().getSymbol().getLine()));
             System.exit(1);
         }
-
+        
         final AST exprNode = this.visit(ctx.expression());
-
+        
         final AST forNode = AST.newSubtree(NodeKind.FOR_NODE, Type.NO_TYPE, exprNode);
-
-        forNode.addChildren(this.visit(ctx.block()));
+        
+        if (ctx.block() == null) {
+            System.out.println(String.format("SEMANTIC ERROR (%d): empty loop block",
+                    ctx.FOR().getSymbol().getLine()));
+            System.exit(1);
+        } else {
+            forNode.addChild(this.visit(ctx.block()));
+        }
 
         return forNode;
     }
@@ -1090,6 +1104,18 @@ public class SemanticChecker extends GoParserBaseVisitor<AST> {
         final AST type = this.visit(ctx.literalType());
 
         return AST.newSubtree(NodeKind.ASSIGN_NODE, Type.NO_TYPE, type);
+    }
+
+    public AST getAST() {
+        return this.root;
+    }
+
+    public VarTable getVarTable() {
+        return this.vt;
+    }
+    
+    public StrTable getStrTable() {
+        return this.st;
     }
 
 }

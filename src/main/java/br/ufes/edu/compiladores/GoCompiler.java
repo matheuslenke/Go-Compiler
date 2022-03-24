@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import br.ufes.edu.compiladores.checker.SemanticChecker;
+import br.ufes.edu.compiladores.code.CodeGen;
 
 /*
   Programa principal para funcionamento de compilador.
@@ -50,12 +51,16 @@ public class GoCompiler {
     checker.visit(tree);
 
     System.out.println("PARSE SUCCESSFUL");
-    checker.printTables();
-    checker.printAST();
+    // checker.printTables();
+    // checker.printAST();
 
     // TreeViewer viewr = new TreeViewer(Arrays.asList(
     // parser.getRuleNames()), tree);
     // viewr.open();
+
+		// Executa o gerador de código.
+		CodeGen codeGen = new CodeGen(checker.getStrTable(), checker.getVarTable(), args[0]);
+		codeGen.execute(checker.getAST());
 
   }
 }
